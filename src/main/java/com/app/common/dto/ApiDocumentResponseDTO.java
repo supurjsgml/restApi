@@ -35,7 +35,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderSuccess {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "true")
             private Boolean result;
@@ -74,7 +74,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -114,7 +114,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError400 {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -154,7 +154,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError401 {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -194,7 +194,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError403 {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -234,7 +234,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError404 {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -274,7 +274,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError401 {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -314,7 +314,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError401 {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -354,7 +354,7 @@ public class ApiDocumentResponseDTO {
         private static class HeaderError500 {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String trNo;
+            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;

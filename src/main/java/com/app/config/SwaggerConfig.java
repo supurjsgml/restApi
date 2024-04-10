@@ -26,7 +26,7 @@ public class SwaggerConfig {
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
 
         return new OpenAPI()
-        		.info(new Info().title("ttttttttt").description("ttttttttt").version("v1"))
+        		.info(new Info().title("RestApi").description("Swagger redocly 프로젝트").version("v1"))
                 .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
                 .security(Arrays.asList(securityRequirement));
     }
@@ -35,7 +35,7 @@ public class SwaggerConfig {
     @Bean
     public GroupedOpenApi apiDocVxSample() {
         return GroupedOpenApi.builder()
-            .group("sample")
+            .group("샘플 API")
             .displayName("샘플 (sample)")
             .pathsToMatch("/api/**")
             .build();
