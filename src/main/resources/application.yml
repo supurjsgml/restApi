@@ -15,7 +15,7 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
     view-names: html/*
-    
+  
 server:
   port: ${port:8080}
   compression:
