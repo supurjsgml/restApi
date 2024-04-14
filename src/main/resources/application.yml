@@ -65,3 +65,34 @@ springdoc:
   # 해당 패턴에 매칭되는 controller만 swagger-ui에 노출한다.
 #  paths-to-match:
 #    - /api/**
+
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile:
+      - local
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile:
+      - dev
+      
+server:
+  port: ${port:8080}
+    
+---
+
+spring:
+  config:
+    activate:
+      on-profile:
+      - prod
+      
+server:
+  port: ${port:8080}

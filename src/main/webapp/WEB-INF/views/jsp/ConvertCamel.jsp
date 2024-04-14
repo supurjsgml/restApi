@@ -13,9 +13,6 @@
 	   <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
 	   
 	   <title>http://devnote.com</title>
-	   <style>
-	   </style>
-	   
 	   <script type="text/javascript">
 		   $(document).ready(function() {
 	           // default data
@@ -296,9 +293,15 @@
         </form>
         <br>
         <p>
-        <textarea id="monkeyinput" class="camel" style="width:48.5%; height:50%;" onkeyup="convert();"></textarea>
-        &nbsp;
-        <textarea id="monkeyoutput" class="camel" style="width:48.5%; height:50%;" readonly></textarea>
+	        <textarea id="monkeyinput" class="camel" onkeyup="convert();"></textarea>
+	        &nbsp;
+	        <textarea id="monkeyoutput" class="camel" readonly></textarea>
         </p>
+        <style>
+	        .camel{
+	            width:48.5%;
+	            height:650px;
+	        }
+	    </style>
     </body>
 </html>

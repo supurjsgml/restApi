@@ -1,4 +1,4 @@
-package com.app.core.annotations;
+package com.app.common.core.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -14,11 +14,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 /**
- * Swagger Response Document
- *
  * <p>Controller level 에서 Swagger 의 응답 형태를 구성할 경우 선언한다.</p>
- *
- * @author jw.yu
+ * 
+ * @user : guney
+ * @date : 2024. 4. 14.
  * @since 1.0
  */
 @Retention(RetentionPolicy.RUNTIME)

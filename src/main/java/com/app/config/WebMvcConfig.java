@@ -16,8 +16,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry.addResourceHandler("/**").addResourceLocations("classpath:/templates/html/");
     }
 	
-	public void viewResource(InternalResourceViewResolver registry) {
-		registry.setPrefix(null);
-	}
+//	public void viewResource(InternalResourceViewResolver registry) {
+//		registry.setPrefix(null);
+//	}
 	
 }
