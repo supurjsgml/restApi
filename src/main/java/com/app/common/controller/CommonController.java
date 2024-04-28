@@ -1,18 +1,24 @@
 package com.app.common.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.common.constant.CommonConstant;
 import com.app.common.core.annotations.ApiDocumentResponse;
+import com.app.common.dto.ApiBodyDTO;
+import com.app.common.dto.req.FileGenReqDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,9 +38,9 @@ public class CommonController {
 	
 	@ApiDocumentResponse
     @Operation(summary = "파일생성", description = "File Generator")
-	@GetMapping(value = "/genFile")
-    public void failDownload(HttpServletResponse response){
-		log.info("FILE_PATH : {}", commonConstant.FILE_PATH);
+	@PostMapping(value = "/genFile", produces = MediaType.APPLICATION_JSON_VALUE)
+    public void failDownload(HttpServletResponse response, @RequestBody ApiBodyDTO.Request<FileGenReqDTO> fileGenReqDTO){
+		log.info("FILE_PATH : {}, fileGenReqDTO : {}", commonConstant.FILE_PATH, fileGenReqDTO);
 		
 		File file = new File(commonConstant.FILE_PATH);
 		
@@ -47,7 +53,7 @@ public class CommonController {
 			
 			if (file.createNewFile()) {
 				FileWriter fileWriter = new FileWriter(file);
-				fileWriter.write("Files in Java might be tricky, but it is fun enough!");
+				fileWriter.write(fileGenReqDTO.getData().getCamelStr());
 				fileWriter.close();
 				
 				fileDownload(response, file);
@@ -65,35 +71,47 @@ public class CommonController {
 	 * 
 	 * @parma  : File file
 	 * @return : void
+	 * @throws UnsupportedEncodingException 
 	 * @user   : guney
 	 * @date   : 2024. 4. 14.
 	 * @since  : 1.0
 	 */
-	public void fileDownload(HttpServletResponse response, File file) {
+	public void fileDownload(HttpServletResponse response, File file) throws UnsupportedEncodingException {
 		if (file.isFile()) {
-			String fileName = "/filename.java";
-			String saveFileName = commonConstant.FILE_PATH.concat(fileName);
-			String contentType = "text";
+			String fileName = "filename.java";
+			String saveFileName = commonConstant.FILE_PATH.concat("/".concat(fileName));
 			
 			long fileLength = file.length();
 			
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
+			StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < fileName.length(); i++) {
+                char c = fileName.charAt(i);
+                if (c > '~') {
+                    sb.append(URLEncoder.encode("" + c, "UTF-8"));
+                } else {
+                    sb.append(c);
+                }
+            }
+            fileName = sb.toString();
+            
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ";");
 			response.setHeader("Content-Transfer-Encoding", "binary");
-			response.setHeader("Content-Type", contentType);
+			response.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 			response.setHeader("Content-Length", "" + fileLength);
 			response.setHeader("Pragma", "no-cache;");
 			response.setHeader("Expires", "-1;");
 			
 			try {
 				FileInputStream fis = new FileInputStream(saveFileName);
-				OutputStream out = response.getOutputStream();
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				
 				int readCount = 0;
 				byte[] buffer = new byte[1024];
 				
 				while((readCount = fis.read(buffer)) != -1){
-					out.write(buffer,0,readCount);
+					out.write(buffer, 0, readCount);
 				}
+				out.writeTo(response.getOutputStream());
 				
 				fis.close();
 				out.close();
