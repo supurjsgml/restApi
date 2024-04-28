@@ -16,8 +16,9 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @ToString
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Schema(name = "FileGenReqDTO", description = "파일생성 DTO")
 public class FileGenReqDTO {
 	
 	@Schema(description = "dto문자열", example = "")
