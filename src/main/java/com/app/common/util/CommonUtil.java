@@ -3,6 +3,7 @@ package com.app.common.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -207,5 +208,23 @@ public class CommonUtil {
         }
         
         return p.build().toUri().toString();
+    }
+    
+    /**
+     * String 소숫점 포맷
+     * 
+     * @param double d : 소숫점 수
+     *        int len  : 포맷 자릿수
+     * @return String
+     * @author guney
+     * @date 2024. 5. 8.
+     */
+    public static String decimalFormat(double d, int len) {
+        String lenStr = "0.";
+        for (int i = 0; i < len; i++) {
+            lenStr = lenStr.concat("0");
+        }
+        
+        return new DecimalFormat(lenStr).format(d);
     }
 }
