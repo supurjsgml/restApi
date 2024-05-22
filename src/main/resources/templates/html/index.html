@@ -7,10 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet"> 
     <!-- ReDoc doesn't change outer page styles --> 
-    <style> body { margin: 0; padding: 0; } </style> 
+    <style> body { margin: 0; padding: 0; } </style>
+     
+    <!-- 로컬 참조 -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/redoc.css}">
+    <script src="/js/redoc.standalone.js"> </script>
   </head> 
   <body> 
+    <!-- 샘플 -->
     <!-- <redoc spec-url="http://petstore.swagger.io/v2/swagger.json"></redoc>
     <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script> -->
 	<nav class="sc-fThUAz iWMFGj">
@@ -26,11 +30,33 @@
 	<div id="redoc-container">
     
     </div> 
-    <script src="/js/redoc.standalone.js"> </script> 
+    
+     
     <script> 
       window.onload = function () { 
         var url = window.location.origin + "/v3/api-docs"; 
-        Redoc.init(url, { scrollYOffset: 50 }, document.getElementById('redoc-container')) 
+        Redoc.init(url, {
+        	scrollYOffset: 50,
+            theme: {
+              colors: {
+                primary: {
+                  //main: '#00aaff'
+                }
+              },
+              typography: {
+                fontFamily: 'Arial, sans-serif',
+                headings: {
+                  fontFamily: 'Arial, sans-serif',
+                }
+              },
+              sidebar: {
+                //backgroundColor: '#f0f0f0'
+              },
+              rightPanel: {
+                //backgroundColor: '#f9f9f9'
+              }
+            }
+        }, document.getElementById('redoc-container')) 
       } 
     </script> 
   </body> 
