@@ -31,13 +31,21 @@ public class SwaggerConfig {
                 .security(Arrays.asList(securityRequirement));
     }
     
-    
     @Bean
-    public GroupedOpenApi apiDocVxSample() {
+    public GroupedOpenApi apiDocSample() {
         return GroupedOpenApi.builder()
             .group("샘플 API")
             .displayName("샘플 (sample)")
             .pathsToMatch("/api/**")
+            .build();
+    }
+    
+    @Bean
+    public GroupedOpenApi apiDocCommon() {
+        return GroupedOpenApi.builder()
+            .group("공통 API")
+            .displayName("공통")
+            .pathsToMatch("/com/**")
             .build();
     }
     

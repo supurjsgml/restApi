@@ -21,8 +21,8 @@ import lombok.ToString;
 @Schema(name = "FileGenReqDTO", description = "파일생성 DTO")
 public class FileGenReqDTO {
 	
-	@Schema(description = "dto문자열", example = "")
-	private String camelStr;
+	@Schema(description = "파일생성경로", example = "")
+	private String filePath;
 	
 	@Schema(description = "파일명", example = "")
 	private String fileNm;

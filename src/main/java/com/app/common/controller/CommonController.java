@@ -1,19 +1,14 @@
 package com.app.common.controller;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.common.constant.CommonConstant;
 import com.app.common.core.annotations.ApiDocumentResponse;
-import com.app.common.dto.ApiBodyDTO;
 import com.app.common.dto.req.FileGenReqDTO;
+import com.app.common.exception.ValidException;
 import com.app.common.service.CommonService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,37 +24,16 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping(value = "/com")
 public class CommonController {
 
-	private final CommonConstant commonConstant;
-	
 	private final CommonService commonService;
 	
 	@ApiDocumentResponse
     @Operation(summary = "파일생성", description = "File Generator")
-	@PostMapping(value = "/genFile", produces = MediaType.APPLICATION_JSON_VALUE)
-    public void failDownload(HttpServletResponse response, @RequestBody ApiBodyDTO.Request<FileGenReqDTO> fileGenReqDTO){
-		log.info("FILE_PATH : {}, fileGenReqDTO : {}", commonConstant.FILE_PATH, fileGenReqDTO);
-		
-		File file = new File(commonConstant.FILE_PATH);
-		
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-		
+	@GetMapping(value = "/genFile", produces = MediaType.APPLICATION_JSON_VALUE)
+    public void failDownload(HttpServletResponse response, @ModelAttribute FileGenReqDTO fileGenReqDTO){
 		try {
-			file = new File(file.getPath().concat("/".concat(fileGenReqDTO.getData().getFileNm())));
-			
-			if (file.createNewFile()) {
-				FileWriter fileWriter = new FileWriter(file);
-				fileWriter.write(fileGenReqDTO.getData().getCamelStr());
-				fileWriter.close();
-				
-				commonService.fileDownload(response, file);
-			} else {
-				log.info("File already exists.");
-			}
-		} catch (IOException e) {
-			log.error("An error occurred.");
-			e.printStackTrace();
+			commonService.fileDownload(response, fileGenReqDTO);
+		} catch (ValidException e) {
+			log.error("CommonController failDownload ERROR : {}", e.getMessage());
 		}
 	}
 

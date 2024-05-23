@@ -227,4 +227,19 @@ public class CommonUtil {
         
         return new DecimalFormat(lenStr).format(d);
     }
+    
+    /**
+     * 맨 앞글자 소문자로 변경
+     * 
+     * @param String str
+     * @return String
+     * @author guney
+     * @date 2024. 5. 22.
+     */
+    public static String decapitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toLowerCase() + str.substring(1);
+    }
 }
