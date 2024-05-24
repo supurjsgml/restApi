@@ -55,7 +55,9 @@ public class CommonServiceImpl implements CommonService {
             for (TemplatesEnum tpl : TemplatesEnum.values()) {
                 
                 File file = new File(filePathParam.concat("/")
-                                                  .concat(tpl.getFolderNm()));
+                                                  .concat(TemplatesEnum.IMPLEMENT.getFolderNm().equals(tpl.getFolderNm())
+                                                		? TemplatesEnum.SERVICE.getFolderNm().concat("/").concat(tpl.getFolderNm())
+                                                        : tpl.getFolderNm()));
                 
                 if (!file.exists()) {
                     //디렉토리 생성
@@ -69,7 +71,7 @@ public class CommonServiceImpl implements CommonService {
                 
                 //파일생성
                 if (file.createNewFile()) {
-//                D:\\sts-4.15.1.RELEASE\\workspace\\restApi\\src\\main\\java\\com\\app\\test
+//                D:/sts-4.15.1.RELEASE/workspace/restApi/src/main/java/com/app/go
                     
                     VelocityContext context = new VelocityContext();
                     
