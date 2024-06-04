@@ -19,7 +19,7 @@ spring:
     basename: messages
   web:
     locale: ko
-    locale-resolver: fixed
+#    locale-resolver: fixed
   
 server:
   port: ${port:8080}
