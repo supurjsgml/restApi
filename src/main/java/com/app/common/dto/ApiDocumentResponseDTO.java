@@ -1,8 +1,14 @@
 package com.app.common.dto;
 
+import org.springframework.http.HttpStatus;
+
+import com.app.common.core.RequestLoggingAspect;
+import com.app.common.enums.MessageEnum;
+import com.app.common.util.MessagesUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +25,7 @@ public class ApiDocumentResponseDTO {
     @Getter
     @Setter
     @ToString
+    @Builder
     @Schema(name = "ApiBodyDocumentDTO.Success", description = "200")
     public static class Success<T> {
 
@@ -31,20 +38,26 @@ public class ApiDocumentResponseDTO {
         private Object page;
 
         @Getter
+        @Setter
+        @Builder
         @Schema(name = "ApiBodyDocumentDTO.HeaderSuccess", description = "")
-        private static class HeaderSuccess {
+        public static class HeaderSuccess {
 
             @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
+            @Builder.Default
+            private String uuid = RequestLoggingAspect.getCurrentUUID();
 
+            @Builder.Default
             @Schema(description = "결과여부", example = "true")
-            private Boolean result;
+            private Boolean result = true;
 
+            @Builder.Default
             @Schema(description = "메시지코드", example = "SUCCESS")
-            private String code;
+            private String code = "SUCCESS";
 
+            @Builder.Default
             @Schema(description = "응답메세지", example = "정상")
-            private String message;
+            private String message = MessagesUtils.getMessage(MessageEnum.SUCCESS_PRCS.getCode());
         }
     }
 
@@ -62,7 +75,6 @@ public class ApiDocumentResponseDTO {
         private T data;
         private Object page;
 
-        @JsonIgnore
         private String code;
 
         public Error(String code) {
@@ -70,17 +82,17 @@ public class ApiDocumentResponseDTO {
         }
 
         @Getter
+        @Builder
         @Schema(name = "ApiBodyDocumentDTO.HeaderError", description = "")
-        private static class HeaderError {
+        public static class HeaderError {
 
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
-
+            @Builder.Default
             @Schema(description = "결과여부", example = "false")
-            private Boolean result;
+            private Boolean result = false;
 
+            @Builder.Default
             @Schema(description = "메시지코드", example = "DEFAULT")
-            private String code = this.getCode();
+            private String code = HttpStatus.BAD_REQUEST.getReasonPhrase();
 
             @Schema(description = "응답메세지", example = "관리자에게 문의 해주세요")
             private String message;
@@ -112,9 +124,6 @@ public class ApiDocumentResponseDTO {
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError400", description = "Bad Request")
         private static class HeaderError400 {
-
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -153,9 +162,6 @@ public class ApiDocumentResponseDTO {
         @Schema(name = "ApiBodyDocumentDTO.HeaderError401", description = "Unauthorized")
         private static class HeaderError401 {
 
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
-
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
 
@@ -192,9 +198,6 @@ public class ApiDocumentResponseDTO {
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError403", description = "Forbidden")
         private static class HeaderError403 {
-
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -233,9 +236,6 @@ public class ApiDocumentResponseDTO {
         @Schema(name = "ApiBodyDocumentDTO.HeaderError404", description = "Not Found")
         private static class HeaderError404 {
 
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
-
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
 
@@ -272,9 +272,6 @@ public class ApiDocumentResponseDTO {
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError405", description = "Method Not Allowed")
         private static class HeaderError401 {
-
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
@@ -313,9 +310,6 @@ public class ApiDocumentResponseDTO {
         @Schema(name = "ApiBodyDocumentDTO.HeaderError415", description = "Unsupported Media Type")
         private static class HeaderError401 {
 
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
-
             @Schema(description = "결과여부", example = "false")
             private Boolean result;
 
@@ -342,7 +336,6 @@ public class ApiDocumentResponseDTO {
         private T data;
         private Object page;
 
-        @JsonIgnore
         private String code;
 
         public Error500(String code) {
@@ -352,9 +345,6 @@ public class ApiDocumentResponseDTO {
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError500", description = "Internal Server Error")
         private static class HeaderError500 {
-
-            @Schema(description = "고유번호", example = "37f956e0-90fc-4e25-ad75-32fd208f58e8")
-            private String uuid;
 
             @Schema(description = "결과여부", example = "false")
             private Boolean result;

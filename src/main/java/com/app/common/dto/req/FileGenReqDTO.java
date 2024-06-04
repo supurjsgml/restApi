@@ -1,6 +1,9 @@
 package com.app.common.dto.req;
 
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +33,7 @@ public class FileGenReqDTO {
 	@Schema(description = "메소드명", example = "")
 	private String methodNm = "methodNm";
 	
+	@NotNull(message = "{BAD_REQUEST}")
 	@Schema(description = "dto 문자열", example = "")
 	private String camelStr;
 	

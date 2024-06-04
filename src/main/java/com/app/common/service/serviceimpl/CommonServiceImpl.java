@@ -91,8 +91,11 @@ public class CommonServiceImpl implements CommonService {
                     template.merge(context, writer);
                     
                     FileUtil.writeFile(file, writer.toString());
+                } else {
+                    throw new ValidException("파일 생성에 실패하였습니다.");
                 }
             }
+            
         } catch(IOException ex){
             log.error("fileDownload ERROR : {}", ex.getMessage());
             throw new DataCustomException("file Save Error");
