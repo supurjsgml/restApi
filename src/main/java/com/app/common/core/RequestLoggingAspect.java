@@ -3,10 +3,8 @@ package com.app.common.core;
 import java.util.UUID;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -20,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RequestLoggingAspect {
 
     private static final ThreadLocal<String> uuidThreadLocal = new ThreadLocal<>();
-//    com.app.common.dto.req /restApi/src/main/java/com/app/common/dto/req/FileGenReqDTO.java
+    
     @Before("execution(* com.app.*.controller.*.*(..))")
     public void logRequest(JoinPoint joinPoint) {
         String uuid = UUID.randomUUID().toString();
