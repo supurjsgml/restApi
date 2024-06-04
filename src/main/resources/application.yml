@@ -15,6 +15,11 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
     view-names: html/*
+  messages:
+    basename: messages
+  web:
+    locale: ko
+    locale-resolver: fixed
   
 server:
   port: ${port:8080}
