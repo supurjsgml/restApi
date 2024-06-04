@@ -92,6 +92,7 @@ public class CommonServiceImpl implements CommonService {
                     
                     FileUtil.writeFile(file, writer.toString());
                 } else {
+                	log.info("filePath : {}", file.getPath());
                     throw new ValidException("파일 생성에 실패하였습니다.");
                 }
             }
