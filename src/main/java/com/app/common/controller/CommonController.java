@@ -1,8 +1,5 @@
 package com.app.common.controller;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,7 +53,7 @@ public class CommonController {
 	@ApiDocumentResponse
     @Operation(summary = "test", description = "test Generator")
     @PostMapping(value = "/test", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Success<ApiBodyDTO> failDownload2(HttpServletResponse response, @RequestBody @Valid FileGenReqDTO fileGenReqDTO){
+    public Success<ApiBodyDTO.Response<String>> failDownload2(HttpServletResponse response, @RequestBody @Valid FileGenReqDTO fileGenReqDTO){
     	HeaderSuccess header = HeaderSuccess.builder().build();
     	Success<Object> result = Success.builder().header(header).build();
     	

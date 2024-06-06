@@ -1,5 +1,6 @@
 package com.app.config;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -13,14 +14,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
 
-import com.app.common.dto.ApiDocumentResponseDTO.Success;
 import com.app.common.dto.ApiDocumentResponseDTO.Success.HeaderSuccess;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Configuration
+@SuppressWarnings("rawtypes")
 public class SwaggerConfig {
 	
 	/**
@@ -41,7 +44,6 @@ public class SwaggerConfig {
 	 * @since  : 1.0
 	 */
 	@Bean
-	@SuppressWarnings("rawtypes")
     public OperationCustomizer customResponseSchemaCustomizer(OpenAPI openAPI) {
         return (Operation operation, HandlerMethod handlerMethod) -> {
             
@@ -82,18 +84,20 @@ public class SwaggerConfig {
         successSchema.setType("object");
         
         Schema<HeaderSuccess> headerSchema = new Schema<>();
+        headerSchema.set$ref("#/components/schemas/ApiBodyDocumentDTO.HeaderSuccess");
 
+        
         Schema<?> dataSchema = new Schema<>();
         dataSchema.set$ref("#/components/schemas/" + genericTypeName);
 
         Schema<Object> pageSchema = new Schema<>();
+        pageSchema.set$ref("#/components/schemas/PageDTO");
         
         successSchema.addProperties("header", headerSchema);
         successSchema.addProperties("data", dataSchema);
         successSchema.addProperties("page", pageSchema);
         
-        System.out.println("successSchema : " + successSchema);
-        successSchema.set$ref("#/components/schemas/ApiBodyDocumentDTO.Success");
+//        successSchema.set$ref("#/components/schemas/ApiBodyDocumentDTO.Success");
 //        successSchema.set$ref("#/components/schemas/" + genericTypeName);
 
         return successSchema;
@@ -125,18 +129,71 @@ public class SwaggerConfig {
         }
         return null;
     }
+    
+    private Map<String, Schema<?>> getSchemasFromProject() {
+        Map<String, Schema<?>> schemaMap = new HashMap<>();
+        try (ScanResult scanResult = new ClassGraph().acceptPackages("com.app.*").scan()) {
+            for (ClassInfo classInfo : scanResult.getAllClasses()) {
+                Class<?> clazz = classInfo.loadClass();
+                // 클래스 이름에 "DTO"가 포함된 경우에만 추가
+                if (clazz.getSimpleName().toUpperCase().contains("DTO")) {
+                    String schemaName = clazz.getSimpleName();
+                    Schema<?> schema = convertClassToSchema(clazz);
+                    schemaMap.put(schemaName, schema);
+                    
+                }
+            }
+        }
+        
+        return schemaMap;
+    }
+    
+    private Schema<?> convertClassToSchema(Class<?> clazz) {
+        Schema<Object> schema = new Schema<>();
+        Map<String, Schema> properties = new HashMap<>();
+        for (Field field : clazz.getDeclaredFields()) {
+            Schema<?> fieldSchema = new Schema<>();
+            fieldSchema.setType(getSchemaType(field.getType()));
+            properties.put(field.getName(), fieldSchema);
+        }
+        schema.setProperties(properties);
+        return schema;
+    }
+
+    private String getSchemaType(Class<?> type) {
+        if (type == String.class) {
+            return "string";
+        } else if (type == Integer.class || type == int.class) {
+            return "integer";
+        } else if (type == Long.class || type == long.class) {
+            return "integer";
+        } else if (type == Float.class || type == float.class) {
+            return "number";
+        } else if (type == Double.class || type == double.class) {
+            return "number";
+        } else if (type == Boolean.class || type == boolean.class) {
+            return "boolean";
+        } else {
+            return "object";
+        }
+    }
 
     @Bean
     public OpenAPI openAPI(){
-    	
         SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
                 .in(SecurityScheme.In.HEADER).name("Authorization");
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
+        
+        Components components = new Components().addSecuritySchemes("bearerAuth", securityScheme);
 
+        // DTO 클래스들을 스캔하여 스키마로 추가
+        Map<String, Schema<?>> schemas = getSchemasFromProject();
+        schemas.forEach(components::addSchemas);
+        
         return new OpenAPI()
         		.info(new Info().title("RestApi").description("Swagger redocly 프로젝트").version("v1"))
-                .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
+                .components(components)
                 .security(Arrays.asList(securityRequirement));
     }
     

@@ -35,7 +35,7 @@ public class ApiDocumentResponseDTO {
         @Schema(description = "data", nullable = true)
         private T data;
 
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Setter
@@ -75,7 +75,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Builder
@@ -110,7 +110,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError400", description = "Bad Request")
@@ -142,7 +142,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError401", description = "Unauthorized")
@@ -174,7 +174,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError403", description = "Forbidden")
@@ -206,7 +206,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError404", description = "Not Found")
@@ -238,7 +238,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError405", description = "Method Not Allowed")
@@ -270,7 +270,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError415", description = "Unsupported Media Type")
@@ -302,7 +302,7 @@ public class ApiDocumentResponseDTO {
         
         private T data;
         
-        private Object page;
+        private PageDTO page;
 
         @Getter
         @Schema(name = "ApiBodyDocumentDTO.HeaderError500", description = "Internal Server Error")
