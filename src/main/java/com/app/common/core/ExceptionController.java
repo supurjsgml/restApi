@@ -44,7 +44,7 @@ public class ExceptionController {
 //  }
   
   @ExceptionHandler({MethodArgumentNotValidException.class})
-  @ResponseStatus(HttpStatus.OK)
+//  @ResponseStatus(HttpStatus.OK)
   public Error<Object> handleMethodNotInvaild(MethodArgumentNotValidException e, WebRequest request) {
       String error = null;
       

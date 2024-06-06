@@ -1,5 +1,8 @@
 package com.app.common.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -7,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.common.core.annotations.ApiDocumentResponse;
+import com.app.common.dto.ApiBodyDTO;
 import com.app.common.dto.ApiDocumentResponseDTO.Success;
 import com.app.common.dto.ApiDocumentResponseDTO.Success.HeaderSuccess;
 import com.app.common.dto.req.FileGenReqDTO;
@@ -32,7 +36,7 @@ public class CommonController {
 	@ApiDocumentResponse
     @Operation(summary = "파일생성", description = "File Generator")
 	@PostMapping(value = "/genFile", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Success<Object> failDownload(HttpServletResponse response, @RequestBody @Valid FileGenReqDTO fileGenReqDTO){
+    public Success<FileGenReqDTO> failDownload(HttpServletResponse response, @RequestBody @Valid FileGenReqDTO fileGenReqDTO){
 	    HeaderSuccess header = HeaderSuccess.builder().build();
 	    Success<Object> result = Success.builder().header(header).build();
 	    
@@ -46,7 +50,27 @@ public class CommonController {
 			header.setCode("FAIL");
 			result = Success.builder().header(header).build();
 		}
-        return result;
+        return null;
 	}
+    
+	@ApiDocumentResponse
+    @Operation(summary = "test", description = "test Generator")
+    @PostMapping(value = "/test", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Success<ApiBodyDTO> failDownload2(HttpServletResponse response, @RequestBody @Valid FileGenReqDTO fileGenReqDTO){
+    	HeaderSuccess header = HeaderSuccess.builder().build();
+    	Success<Object> result = Success.builder().header(header).build();
+    	
+    	try {
+    		commonService.createPackage(response, fileGenReqDTO);
+    	} catch (ValidException e) {
+    		log.error("CommonController failDownload ERROR : {}", e.getMessage());
+    		
+    		header.setMessage(e.getMessage());
+    		header.setResult(false);
+    		header.setCode("FAIL");
+    		result = Success.builder().header(header).build();
+    	}
+    	return null;
+    }
 
 }

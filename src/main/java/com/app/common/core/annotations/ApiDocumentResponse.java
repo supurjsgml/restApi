@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Documented
 @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "API 정상 호출", useReturnTypeSchema = true, content = @Content(schema = @Schema(implementation = ApiDocumentResponseDTO.Success.class))),
+    @ApiResponse(responseCode = "200", description = "API 정상 호출", useReturnTypeSchema = true),
     @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ApiDocumentResponseDTO.Error400.class))),
     @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ApiDocumentResponseDTO.Error401.class))),
     @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = ApiDocumentResponseDTO.Error403.class))),
