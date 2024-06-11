@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Configuration
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "deprecation" })
 public class SwaggerConfig {
 	
 	/**
@@ -72,7 +72,6 @@ public class SwaggerConfig {
                 	}
                 }
             }
-//            System.out.println("content : " + operation);
             
             return operation;
         };
@@ -96,9 +95,6 @@ public class SwaggerConfig {
         successSchema.addProperties("header", headerSchema);
         successSchema.addProperties("data", dataSchema);
         successSchema.addProperties("page", pageSchema);
-        
-//        successSchema.set$ref("#/components/schemas/ApiBodyDocumentDTO.Success");
-//        successSchema.set$ref("#/components/schemas/" + genericTypeName);
 
         return successSchema;
     }
@@ -163,13 +159,9 @@ public class SwaggerConfig {
     private String getSchemaType(Class<?> type) {
         if (type == String.class) {
             return "string";
-        } else if (type == Integer.class || type == int.class) {
+        } else if ((type == Integer.class || type == int.class) || (type == Long.class || type == long.class)) {
             return "integer";
-        } else if (type == Long.class || type == long.class) {
-            return "integer";
-        } else if (type == Float.class || type == float.class) {
-            return "number";
-        } else if (type == Double.class || type == double.class) {
+        } else if ((type == Float.class || type == float.class) || (type == Double.class || type == double.class)) {
             return "number";
         } else if (type == Boolean.class || type == boolean.class) {
             return "boolean";
