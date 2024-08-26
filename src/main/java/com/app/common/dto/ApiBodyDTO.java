@@ -1,5 +1,6 @@
 package com.app.common.dto;
 
+import com.app.common.dto.ApiDocumentResponseDTO.Success.HeaderSuccess;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,8 +48,8 @@ public class ApiBodyDTO {
         @Schema(example="true")
         private boolean success = false;
         
-        @Schema(example="ERR-A0")
-        private String debugCode;
+        @Schema(example="")
+        private HeaderSuccess header;
         
         @Schema(example="성공")
         private String message = "통신에 실패하였습니다.";
@@ -61,11 +62,12 @@ public class ApiBodyDTO {
         private T data;
 
         @Builder
-        public Response(T data, PageDTO page, boolean success, String message) {
+        public Response(T data, PageDTO page, boolean success, String message, HeaderSuccess header) {
             this.data = data;
             this.page = page;
             this.success = success;
             this.message = message;
+            this.header = header;
         }
     }
 }

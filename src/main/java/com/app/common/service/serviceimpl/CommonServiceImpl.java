@@ -3,6 +3,8 @@ package com.app.common.service.serviceimpl;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
@@ -44,8 +46,6 @@ public class CommonServiceImpl implements CommonService {
      * @since  : 1.0
      */
     public void createPackage(HttpServletResponse response, FileGenReqDTO fileGenReqDTO) throws ValidException {
-        log.info("fileGenReqDTO : {}", fileGenReqDTO);
-        
         try {
             String fileNm = CommonUtil.capitalize(fileGenReqDTO.getFileNm());
             String dtoNm = CommonUtil.capitalize(fileNm).concat(TemplatesEnum.DTO.getFileNm());
@@ -101,5 +101,36 @@ public class CommonServiceImpl implements CommonService {
             log.error("fileDownload ERROR : {}", ex.getMessage());
             throw new DataCustomException("file Save Error");
         }
+    }
+    
+    public Map<String ,String> getFileInfo(HttpServletResponse response, FileGenReqDTO fileGenReqDTO) {
+        Map<String ,String> result = new HashMap<>();
+        
+        String fileNm = CommonUtil.capitalize(fileGenReqDTO.getFileNm());
+        String dtoNm = CommonUtil.capitalize(fileNm).concat(TemplatesEnum.DTO.getFileNm());
+        String filePathParam = StringUtils.isBlank(fileGenReqDTO.getFilePath()) ? commonConstant.FILE_PATH : fileGenReqDTO.getFilePath();
+        
+        for (TemplatesEnum tpl : TemplatesEnum.values()) {
+            VelocityContext context = new VelocityContext();
+            
+            context.put("packPath", filePathParam.contains("com")
+                ? filePathParam.substring(filePathParam.indexOf("com"), filePathParam.length()).replaceAll(RexUtil.SLASH_BACKSLASH_PATTERN, ".")
+                    : "com.example");
+            
+            context.put("fileNm", fileNm);
+            context.put("fileVarName", CommonUtil.decapitalize(fileNm));
+            context.put("methodNm", fileGenReqDTO.getMethodNm());
+            context.put("dtoNm", dtoNm);
+            context.put("dtoVarName", CommonUtil.decapitalize(dtoNm));
+            
+            // 템플릿 파일 로딩
+            Template template = velocityEngine.getTemplate(tpl.getVmPath());
+            StringWriter writer = new StringWriter();
+            template.merge(context, writer);
+            
+            result.put(tpl.getFolderNm(), writer.toString());
+        }
+            
+        return result;
     }
 }

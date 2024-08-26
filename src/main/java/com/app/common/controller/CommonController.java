@@ -1,5 +1,7 @@
 package com.app.common.controller;
 
+import java.util.Map;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,8 +13,11 @@ import com.app.common.dto.ApiBodyDTO;
 import com.app.common.dto.ApiDocumentResponseDTO.Success;
 import com.app.common.dto.ApiDocumentResponseDTO.Success.HeaderSuccess;
 import com.app.common.dto.req.FileGenReqDTO;
+import com.app.common.enums.MessageEnum;
 import com.app.common.exception.ValidException;
 import com.app.common.service.CommonService;
+import com.app.common.util.ApiResUtil;
+import com.app.common.util.MessagesUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,7 +48,6 @@ public class CommonController {
 			log.error("CommonController failDownload ERROR : {}", e.getMessage());
 			
 			header.setMessage(e.getMessage());
-			header.setResult(false);
 			header.setCode("FAIL");
 			result = Success.builder().header(header).build();
 		}
@@ -51,23 +55,20 @@ public class CommonController {
 	}
     
 	@ApiDocumentResponse
-    @Operation(summary = "test", description = "test Generator")
-    @PostMapping(value = "/test", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Success<ApiBodyDTO.Response<String>> failDownload2(HttpServletResponse response, @RequestBody @Valid FileGenReqDTO fileGenReqDTO){
-    	HeaderSuccess header = HeaderSuccess.builder().build();
-    	Success<Object> result = Success.builder().header(header).build();
+    @Operation(summary = "겟겟", description = "게엣")
+    @PostMapping(value = "/getFileInfo", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiBodyDTO.Response<Map<String ,String>> getFileInfo(HttpServletResponse response, @RequestBody FileGenReqDTO fileGenReqDTO){
+	    ApiBodyDTO.Response<Map<String ,String>> result = null;
     	
     	try {
-    		commonService.createPackage(response, fileGenReqDTO);
-    	} catch (ValidException e) {
-    		log.error("CommonController failDownload ERROR : {}", e.getMessage());
-    		
-    		header.setMessage(e.getMessage());
-    		header.setResult(false);
-    		header.setCode("FAIL");
-    		result = Success.builder().header(header).build();
+    	    result = ApiResUtil.success(commonService.getFileInfo(response, fileGenReqDTO), HeaderSuccess.builder().build(), MessageEnum.SUCCESS.getCode());
+    	} catch (Exception e) {
+    	    e.printStackTrace();
+    		log.error("CommonController getFileInfo ERROR : {}", e.getMessage());
+    		result = ApiResUtil.failed(MessagesUtils.getMessage(MessageEnum.INTERNAL_SERVER_ERROR.getCode()));
     	}
-    	return null;
+    	
+    	return result;
     }
 
 }
