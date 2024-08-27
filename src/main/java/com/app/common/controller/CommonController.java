@@ -55,7 +55,7 @@ public class CommonController {
 	}
     
 	@ApiDocumentResponse
-    @Operation(summary = "겟겟", description = "게엣")
+    @Operation(summary = "포스트포스트포스트포스토스트포스트포스트", description = "토스트")
     @PostMapping(value = "/getFileInfo", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiBodyDTO.Response<Map<String ,String>> getFileInfo(HttpServletResponse response, @RequestBody FileGenReqDTO fileGenReqDTO){
 	    ApiBodyDTO.Response<Map<String ,String>> result = null;
