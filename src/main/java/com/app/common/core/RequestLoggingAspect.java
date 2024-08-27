@@ -30,7 +30,7 @@ public class RequestLoggingAspect {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         
         String requestURL = request.getRequestURL().toString();
-        String clientDomain = request.getServerName().concat(":") + request.getServerPort();
+        String clientDomain = request.getHeader("Host");
         
         log.info("Request UUID : {} - RequestURL : {} - ClientDomain : {} - IP : {} - Package Info : {}", uuid, requestURL, clientDomain, IP.get(), joinPoint.getSignature());
     }
