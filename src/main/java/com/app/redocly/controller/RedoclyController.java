@@ -25,28 +25,28 @@ import lombok.extern.slf4j.Slf4j;
 public class RedoclyController {
 
 	@ApiDocumentResponse
-    @Operation(summary = "현만", description = "현만 조회")
+    @Operation(summary = "GET", description = "조회")
 	@GetMapping(value = "/getUrl")
     public void test1(){
 		
     }
 	
 	@ApiDocumentResponse
-	@Operation(summary = "샘출", description = "샘출 등록")
+	@Operation(summary = "POST", description = "등록")
 	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
 	public void test2(@RequestBody SampleDTO sampleDTO){
 		
 	}
 	
 	@ApiDocumentResponse
-	@Operation(summary = "병모", description = "병모 수정")
+	@Operation(summary = "PUT", description = "수정")
 	@PutMapping(value = "/mod")
 	public void test3(){
 		
 	}
 	
 	@ApiDocumentResponse
-	@Operation(summary = "개수한무", description = "개수한무 삭제")
+	@Operation(summary = "DELETE", description = "삭제")
 	@DeleteMapping(value = "/del")
 	public void test4(){
 		
