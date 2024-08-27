@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.app.common.enums.IP;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,9 +28,11 @@ public class RequestLoggingAspect {
         
         // HttpServletRequest 객체를 사용하여 요청 URL 가져오기
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        
         String requestURL = request.getRequestURL().toString();
-
-        log.info("Request UUID : {} - URL : {} - Package Info : {}", uuid, requestURL, joinPoint.getSignature());
+        String clientDomain = request.getServerName().concat(":") + request.getServerPort();
+        
+        log.info("Request UUID : {} - RequestURL : {} - ClientDomain : {} - IP : {} - Package Info : {}", uuid, requestURL, clientDomain, IP.get(), joinPoint.getSignature());
     }
 
     public static String getCurrentUUID() {
