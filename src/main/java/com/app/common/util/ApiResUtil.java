@@ -71,7 +71,7 @@ public class ApiResUtil {
     
     public static <T> ApiBodyDTO.Response<T> failed(String message) {
         HeaderSuccess header = HeaderSuccess.builder()
-            .code(HttpStatus.BAD_REQUEST.name())
+            .code(HttpStatus.INTERNAL_SERVER_ERROR.name())
             .message(MessagesUtils.getMessage(MessageEnum.DEFAULT.getCode()))
             .build(); 
         

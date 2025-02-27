@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ValidException extends Exception {
+public class ValidException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = -2891298704913159355L;

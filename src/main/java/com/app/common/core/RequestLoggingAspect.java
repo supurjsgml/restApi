@@ -32,6 +32,7 @@ public class RequestLoggingAspect {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         
         String requestURL = request.getRequestURL().toString();
+        String origin = request.getHeader("Origin");
         
         String referer = request.getHeader("Referer");
         String clientDomain = null;
@@ -45,7 +46,7 @@ public class RequestLoggingAspect {
             }
         }
         
-        log.info("Request UUID : {} - RequestURL : {} - ClientDomain : {} - IP : {} - Package Info : {}", uuid, requestURL, clientDomain, IP.get(), joinPoint.getSignature());
+        log.info("Request UUID : {} - Origin : {} - RequestURL : {} - ClientDomain : {} - IP : {} - Package Info : {}", uuid, origin, requestURL, clientDomain, IP.get(), joinPoint.getSignature());
     }
 
     public static String getCurrentUUID() {
