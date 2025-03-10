@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         BRANCH = 'master'
-        DEPLOY_SERVER = 'ec2-user@50.17.47.14'
+        DEPLOY_SERVER = 'ec2-user@34.235.143.19'
         APP_DIR = '/home/ec2-user/restApi'
         GIT_CREDENTIALS_ID = 'github-access-token'  // Jenkins Credentials에서 등록한 ID
     }
