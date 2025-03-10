@@ -14,7 +14,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh '''
-                            ssh -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
+                            ssh -o StrictHostKeyChecking=no -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
                             echo "[1] 기존 프로젝트 유지한 채 소스 최신화"
                             cd ${APP_DIR}
                             git reset --hard origin/${BRANCH}
@@ -40,7 +40,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        ssh -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
+                        ssh -o StrictHostKeyChecking=no -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
                         echo "[4] 기존 실행 중인 스프링 부트 서버 종료 시도"
                         pgrep -f 'build/libs/restApi.jar' | xargs kill -9 || true
 
