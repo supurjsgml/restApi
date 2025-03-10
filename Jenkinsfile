@@ -53,9 +53,6 @@ pipeline {
                             
                             echo "[6] 실행된 프로세스 확인"
                             ps aux | grep java
-                            
-                            echo "[7] nohup 로그 확인"
-                            tail -n 20 ${APP_DIR}/app.log
                         EOF
                     '''
                 }

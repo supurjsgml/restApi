@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Tag(name = "샘플1",description = "sample RedoclyController")
+@Tag(name = "샘플",description = "sample RedoclyController")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api")
