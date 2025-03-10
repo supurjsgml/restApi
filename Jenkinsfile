@@ -15,7 +15,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh '''
-                            sudo -u jenkins ssh -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "
+                            ssh -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "
                                 echo '[1] 기존 프로젝트 유지한 채 소스 최신화' &&
                                 cd ${APP_DIR} &&
                                 git reset --hard origin/${BRANCH} &&
