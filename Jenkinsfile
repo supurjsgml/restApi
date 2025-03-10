@@ -35,14 +35,19 @@ pipeline {
                                 
                                 echo "Gradle 빌드 시작됨, 로그 모니터링 중..."
                                 
-                                # ✅ Gradle 빌드가 끝날 때까지 대기
-                                while ps aux | grep '[g]radlew' > /dev/null; do
+                                # ✅ Gradle 빌드가 끝날 때까지 대기 (pgrep 사용)
+                                while pgrep -f 'gradlew' > /dev/null; do
                                     echo "Gradle 빌드 진행 중..."
                                     sleep 5
                                 done
 
-                                echo "Gradle Build Completed"
-                                tail -n 20 ${APP_DIR}/gradle_build.log  # 빌드 로그 출력
+                                # ✅ 빌드 완료 확인
+                                if tail -n 20 ${APP_DIR}/gradle_build.log | grep -q 'BUILD SUCCESSFUL'; then
+                                    echo "Gradle 빌드 완료됨"
+                                else
+                                    echo "Gradle 빌드 실패"
+                                    exit 1
+                                fi
                             EOF
                         '''
                     }
