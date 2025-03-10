@@ -31,8 +31,18 @@ pipeline {
                                 chmod +x gradlew
                                 
                                 # ✅ nohup으로 Gradle 빌드 실행
-                                nohup ./gradlew clean build -x test > ${APP_DIR}/gradle_build.log 2>&1 & disown
+                                ./gradlew clean build -x test > ${APP_DIR}/gradle_build.log 2>&1
                                 
+                                echo "Gradle 빌드 시작됨, 로그 모니터링 중..."
+                                
+
+                                # ✅ 빌드 완료 확인
+                                if tail -n 20 ${APP_DIR}/gradle_build.log | grep 'BUILD SUCCESSFUL'; then
+                                    echo "Gradle 빌드 완료됨"
+                                else
+                                    echo "Gradle 빌드 실패"
+                                    exit 1
+                                fi
                             EOF
                         '''
                     }
