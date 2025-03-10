@@ -28,6 +28,7 @@ pipeline {
                         pkill -f 'java -jar' || true
                         cd ${APP_DIR}
                         nohup java -jar build/libs/restApi.jar --spring.profiles.active=prod > app.log 2>&1 &
+                        sleep 3
                         ps aux | grep java
                         EOF
                         '''
