@@ -2,51 +2,34 @@ pipeline {
     agent any
 
     environment {
-        REPO_URL = 'https://github.com/supurjsgml/restApi.git'
         BRANCH = 'master'
         DEPLOY_SERVER = 'ec2-user@50.17.47.14'
         APP_DIR = '/home/ec2-user/restApi'
-        GIT_CREDENTIALS_ID = 'github-access-token'  // 저장된 credentials ID 사용
+        GIT_CREDENTIALS_ID = 'github-access-token'  // Jenkins Credentials에서 등록한 ID
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Deploy to EC2 and Build') {
             steps {
                 script {
-                    // Jenkins Credentials 사용하여 GitHub 인증 처리
                     withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh '''
-                        rm -rf restApi
-                        git clone -b ${BRANCH} https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/supurjsgml/restApi.git
+                        ssh -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
+                        # 1️⃣ 기존 프로젝트 삭제 후 새롭게 클론
+                        rm -rf ${APP_DIR}
+                        git clone -b ${BRANCH} https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/supurjsgml/restApi.git ${APP_DIR}
+
+                        # 2️⃣ 빌드 실행
+                        cd ${APP_DIR}
+                        chmod +x gradlew
+                        ./gradlew clean build -x test
+
+                        # 3️⃣ 기존 실행 중인 애플리케이션 종료 후 새 JAR 실행
+                        pkill -f 'java -jar' || true
+                        nohup java -jar build/libs/*.jar > app.log 2>&1 &
+                        EOF
                         '''
                     }
-                }
-            }
-        }
-
-        stage('Build JAR') {
-            steps {
-                script {
-                    sh '''
-                    cd restApi
-                    chmod +x gradlew
-                    ./gradlew clean build -x test
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to EC2') {
-            steps {
-                script {
-                    sh '''
-                    scp -i /home/ec2-user/.ssh/id_rsa restApi/build/libs/*.jar ${DEPLOY_SERVER}:${APP_DIR}
-                    ssh -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
-                    cd ${APP_DIR}
-                    pkill -f 'java -jar' || true
-                    nohup java -jar *.jar > app.log 2>&1 &
-                    EOF
-                    '''
                 }
             }
         }
