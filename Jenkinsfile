@@ -29,6 +29,7 @@ pipeline {
                 script {
                     sh '''
                     cd restApi
+                    chmod +x gradlew
                     ./gradlew clean build -x test
                     '''
                 }
