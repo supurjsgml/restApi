@@ -39,7 +39,7 @@ pipeline {
                         echo "[4] 생성된 JAR 이름: $JAR_NAME"
 
                         echo "[5] 기존 JAR 파일 백업 및 새 JAR 전송"
-                        scp -o StrictHostKeyChecking=no -i /home/ec2-user/.ssh/id_rsa restApi/${BUILD_DIR}/restApi.jar ${DEPLOY_SERVER}:${APP_DIR}/$JAR_NAME
+                        scp -o StrictHostKeyChecking=no -i /home/ec2-user/.ssh/id_rsa restApi/${BUILD_DIR}/restApi.jar ${DEPLOY_SERVER}:${APP_DIR}/build/libs/$JAR_NAME
 
                         echo "[6] 서버에서 기존 애플리케이션 종료 후 새 JAR 실행"
                         ssh -o StrictHostKeyChecking=no -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
