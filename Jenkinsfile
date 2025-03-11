@@ -45,7 +45,7 @@ pipeline {
                         echo "[6] 서버에서 기존 애플리케이션 종료 후 새 JAR 실행"
                         ssh -o StrictHostKeyChecking=no -i /home/ec2-user/.ssh/id_rsa ${DEPLOY_SERVER} "bash -s" <<EOF
                         echo "[7] 기존 실행 중인 스프링 서버 종료 시도"
-                        pgrep -f 'build/libs/restApi.jar' | xargs kill -9 || true
+                        pgrep -f 'build/libs/*.jar' | xargs kill -9 || true
 
                         echo "[8] 새 JAR 실행"
                         nohup java -jar ${JAR_DIR}/$JAR_NAME --server.port=8081 --spring.profiles.active=prod > ${APP_DIR}/app.log 2>&1 & disown
