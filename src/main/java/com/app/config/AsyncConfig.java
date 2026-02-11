@@ -10,13 +10,15 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @EnableAsync
 public class AsyncConfig {
-    @Bean
-    public Executor taskExecutor() {
+    
+	@Bean
+    Executor taskExecutor() {
         final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(4);
-        executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("AsyncTaskExecutor-");
+        
+        executor.setCorePoolSize(2);                        //기본적으로 유지할 스레드 수
+        executor.setMaxPoolSize(4);                         //동시에 실행 가능한 최대 스레드 수
+        executor.setQueueCapacity(100);                     //큐에 쌓아둘 작업 개수
+        executor.setThreadNamePrefix("AsyncTaskExecutor-"); //스레드 이름 prefix
         executor.initialize();
         
         return executor;
