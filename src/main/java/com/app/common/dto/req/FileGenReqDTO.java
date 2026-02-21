@@ -2,9 +2,10 @@ package com.app.common.dto.req;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +21,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Schema(name = "FileGenReqDTO", description = "파일생성 DTO")
 public class FileGenReqDTO {
 	
@@ -30,6 +33,7 @@ public class FileGenReqDTO {
 	@Schema(description = "파일명", example = "")
 	private String fileNm;
 	
+	@Builder.Default
 	@Schema(description = "메소드명", example = "")
 	private String methodNm = "methodNm";
 	
