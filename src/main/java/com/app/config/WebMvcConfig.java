@@ -45,8 +45,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://vue-front-807ffc6b572e.herokuapp.com")
-                .allowedOrigins("chrome-extension://ilaafkabnbkdgaieedckdnfkmapocimc", "chrome-extension://chjbcemdkiommdpeklplkbfpemefejcp")	//구글 확장 프로그램 로컬, 운영
+		        .allowedOrigins(
+		                  "https://vue-front-807ffc6b572e.herokuapp.com" 
+		                , "https://guney.kro.kr"
+		                , "chrome-extension://ilaafkabnbkdgaieedckdnfkmapocimc" //구글 확장 프로그램 운영
+		                , "chrome-extension://chjbcemdkiommdpeklplkbfpemefejcp" //구글 확장 프로그램 운영
+		            )
 //                .allowedOrigins("http://localhost")
                 .allowedMethods("*"); //"GET", "POST", "PUT", "DELETE", "FETCH"
     }
