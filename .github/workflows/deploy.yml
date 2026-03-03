@@ -30,6 +30,10 @@ jobs:
       #프로젝트 빌드
       - name: Build with Gradle
         run: ./gradlew clean bootJar -x test
+        
+      #헤로쿠 cli 설치
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
 
       #Heroku 배포
       - name: Deploy to Heroku
@@ -38,7 +42,7 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          usedocker: true
+          usedocker: false
           healthcheck: "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e/api/getUrl"
           checkstring: "UP"
           delay: 20
