@@ -1,13 +1,34 @@
 name: master
 
 on:
-  workflow_dispatch:
-#  push: #수동
-#    branches:
-#      - master
+    workflow_dispatch:
+#    push: #수동
+#      branches:
+#        - master
 
 jobs:
+    #소스 변동 사항이 있는지
+    check:
+        runs-on: ubuntu-latest
+        outputs:
+            changed: ${{ steps.changed-files.outputs.changed }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 2  #최근 커밋 2개 get
+            - name: Check for changes
+              id: changed-files
+              run: | #디프디프가 있니 ?
+                if git diff --quiet HEAD^ HEAD -- src build.gradle; then
+                  echo "changed=false" >> $GITHUB_OUTPUT
+                else
+                  echo "changed=true" >> $GITHUB_OUTPUT
+                fi
+              
     build:
+        needs: check
+        if: needs.check.outputs.changed == 'true'
         runs-on: ubuntu-latest
         
         steps:
@@ -40,7 +61,8 @@ jobs:
     
           
     deploy:
-        needs: build # 빌드 작업이 성공해야만 실행됨
+        needs: [check, build]
+        if: needs.check.outputs.changed == 'true'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -67,5 +89,18 @@ jobs:
                 usedocker: false
                 healthcheck: "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e/api/getUrl"
                 checkstring: ""
-                delay: 20
+                delay: 40
                 rollbackonhealthcheckfailed: true
+            
+    #변경사항 없으면 서버만 재시작    
+    restart:
+        needs: check
+        if: needs.check.outputs.changed == 'false'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Install Heroku CLI
+              run: curl https://cli-assets.heroku.com/install.sh | sh
+            - name: Restart Heroku Dynos
+              run: heroku ps:restart -a ${{ secrets.HEROKU_APP_NAME }}
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
