@@ -27,8 +27,8 @@ public class RedoclyController {
 	@ApiDocumentResponse
     @Operation(summary = "GET", description = "조회")
 	@GetMapping(value = "/getUrl")
-    public void test1(){
-		
+    public String test1(){
+		return "뭐에요 왜 깨워요 !";
     }
 	
 	@ApiDocumentResponse
