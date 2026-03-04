@@ -2,6 +2,14 @@ name: master
 
 on:
     workflow_dispatch:
+        inputs:
+            action_type:
+                required: true
+                default: 'deploy'
+                type: choice
+                options:
+                  - deploy
+                  - restart
 #    push: #수동
 #      branches:
 #        - master
@@ -11,30 +19,15 @@ jobs:
     check:
         runs-on: ubuntu-latest
         outputs:
-            changed: ${{ steps.changed-files.outputs.changed }}
+          mode: ${{ github.event.inputs.action_type }}
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                fetch-depth: 2
-            - name: Check for changes
-              id: changed-files
-              run: | #디프디프가 있니 ?
-                  DIFF=$(git diff --name-only HEAD^ HEAD -- src/main build.gradle || true)
-                  
-                  if [ "${{ steps.cache-check.outputs.cache-hit }}" = "true" ]; then
-                    echo "changed=false" >> $GITHUB_OUTPUT
-                  elif [ -n "$DIFF" ]; then
-                    echo "changed=true" >> $GITHUB_OUTPUT
-                  else
-                    echo "changed=false" >> $GITHUB_OUTPUT
-                  fi
+          - name: Mode Selected
+            run: echo "${{ github.event.inputs.action_type }}"
               
     build:
         needs: check
-        if: needs.check.outputs.changed == 'true'
+        if: needs.check.outputs.mode == 'deploy'
         runs-on: ubuntu-latest
-        
         steps:
             #소스 코드 체크아웃
             - name: Checkout code
@@ -66,7 +59,7 @@ jobs:
           
     deploy:
         needs: [check, build]
-        if: needs.check.outputs.changed == 'true'
+        if: needs.check.outputs.mode == 'deploy'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -99,7 +92,7 @@ jobs:
     #변경사항 없으면 서버만 재시작    
     restart:
         needs: check
-        if: needs.check.outputs.changed == 'false'
+        if: needs.check.outputs.mode == 'restart'
         runs-on: ubuntu-latest
         steps:
             - name: Install Heroku CLI
