@@ -2,14 +2,6 @@ name: master
 
 on:
     workflow_dispatch:
-        inputs:
-            action_type:
-                required: true
-                default: 'deploy'
-                type: choice
-                options:
-                  - deploy
-                  - restart
 #    push: #수동
 #      branches:
 #        - master
@@ -19,15 +11,27 @@ jobs:
     check:
         runs-on: ubuntu-latest
         outputs:
-          mode: ${{ github.event.inputs.action_type }}
+            changed: ${{ steps.changed-files.outputs.changed }}
         steps:
-          - name: Mode Selected
-            run: echo "${{ github.event.inputs.action_type }}"
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 2
+            - name: Check for changes
+              id: changed-files
+              run: | #디프디프가 있니 ?
+                  if git diff --quiet HEAD^ HEAD -- \
+                    src/main build.gradle; then
+                    echo "changed=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "changed=true" >> $GITHUB_OUTPUT
+                  fi
               
     build:
         needs: check
-        if: needs.check.outputs.mode == 'deploy'
+        if: needs.check.outputs.changed == 'true'
         runs-on: ubuntu-latest
+        
         steps:
             #소스 코드 체크아웃
             - name: Checkout code
@@ -59,13 +63,11 @@ jobs:
           
     deploy:
         needs: [check, build]
-        if: needs.check.outputs.mode == 'deploy'
+        if: needs.check.outputs.changed == 'true'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                fetch-depth: 0
               
             #빌드한 JAR 파일 다운로드
             - name: Download Build Jar
@@ -80,19 +82,21 @@ jobs:
             
             #Heroku 배포
             - name: Deploy to Heroku
-              env:
-                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-              run: |
-                git config user.name "github-actions"
-                git config user.email "github-actions@github.com"
-                git commit --allow-empty -m "Force deploy: $(date)"
-                heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
-                git push heroku master --force
+              uses: akhileshns/heroku-deploy@v3.13.15
+              with:
+                heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+                heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+                heroku_email: ${{ secrets.HEROKU_EMAIL }}
+                usedocker: false
+                healthcheck: "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e/api/getUrl"
+                checkstring: ""
+                delay: 20
+                rollbackonhealthcheckfailed: true
             
     #변경사항 없으면 서버만 재시작    
     restart:
         needs: check
-        if: needs.check.outputs.mode == 'restart'
+        if: needs.check.outputs.changed == 'false'
         runs-on: ubuntu-latest
         steps:
             - name: Install Heroku CLI
