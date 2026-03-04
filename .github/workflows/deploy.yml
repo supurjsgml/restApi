@@ -20,14 +20,14 @@ jobs:
             - name: Check for changes
               id: changed-files
               run: | #디프디프가 있니 ?
-                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                  DIFF=$(git diff --name-only HEAD^ HEAD -- src/main build.gradle || true)
+                  
+                  if [ "${{ steps.cache-check.outputs.cache-hit }}" = "true" ]; then
                     echo "changed=false" >> $GITHUB_OUTPUT
+                  elif [ -n "$DIFF" ]; then
+                    echo "changed=true" >> $GITHUB_OUTPUT
                   else
-                    if git diff --quiet HEAD^ HEAD -- src/main build.gradle; then
-                      echo "changed=false" >> $GITHUB_OUTPUT
-                    else
-                      echo "changed=true" >> $GITHUB_OUTPUT
-                    fi
+                    echo "changed=false" >> $GITHUB_OUTPUT
                   fi
               
     build:
