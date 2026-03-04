@@ -20,11 +20,9 @@ jobs:
             - name: Check for changes
               id: changed-files
               run: | #디프디프가 있니 ?
-                  echo "--- Changed Files List ---"
-                  git diff --name-only HEAD^ HEAD
-                  
                   DIFF=$(git diff --name-only HEAD^ HEAD)
-                  echo "Changed files: $DIFF"
+                  
+                  echo "$DIFF"
                   
                   if echo "$DIFF" | grep -E 'src/main/|build.gradle'; then
                     echo "changed=true" >> $GITHUB_OUTPUT
