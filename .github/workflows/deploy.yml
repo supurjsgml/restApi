@@ -21,7 +21,7 @@ jobs:
               id: changed-files
               run: | #디프디프가 있니 ?
                   if git diff --quiet HEAD^ HEAD -- \
-                    src/main build.gradle; then
+                    src/ build.gradle; then
                     echo "changed=false" >> $GITHUB_OUTPUT
                   else
                     echo "changed=true" >> $GITHUB_OUTPUT
