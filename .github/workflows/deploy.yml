@@ -20,8 +20,6 @@ jobs:
             - name: Check for changes
               id: changed-files
               run: | #디프디프가 있니 ?
-                  DIFF=$(git diff --name-only HEAD^ HEAD)
-                  
                   if git diff --quiet HEAD^ HEAD -- src/main build.gradle; then
                     echo "changed=true" >> $GITHUB_OUTPUT
                   else
