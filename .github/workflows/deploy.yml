@@ -23,12 +23,14 @@ jobs:
                   echo "--- Changed Files List ---"
                   git diff --name-only HEAD^ HEAD
                   
-                  FILES_CHANGED=$(git diff --name-only HEAD^ HEAD | grep -E 'src/main/|build.gradle' || true)
+                  DIFF=$(git diff --name-only HEAD^ HEAD)
+                  echo "Changed files: $DIFF"
                   
-                  if [ -z "$FILES_CHANGED" ]; then
-                    echo "changed=false" >> $GITHUB_OUTPUT
-                  else
+                  if echo "$DIFF" | grep -E 'src/main/|build.gradle'; then
                     echo "changed=true" >> $GITHUB_OUTPUT
+                  else
+                    # 소스 수정이 없는 커밋이 HEAD라면 버튼을 아무리 눌러도 false가 나옵니다.
+                    echo "changed=false" >> $GITHUB_OUTPUT
                   fi
               
     build:
