@@ -16,14 +16,16 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                fetch-depth: 2  #최근 커밋 2개 get
+                fetch-depth: 0
             - name: Check for changes
               id: changed-files
               run: | #디프디프가 있니 ?
                   echo "--- Changed Files List ---"
                   git diff --name-only HEAD^ HEAD
                   
-                  if git diff --quiet HEAD^ HEAD -- src/main build.gradle; then
+                  FILES_CHANGED=$(git diff --name-only HEAD^ HEAD | grep -E 'src/main/|build.gradle' || true)
+                  
+                  if [ -z "$FILES_CHANGED" ]; then
                     echo "changed=false" >> $GITHUB_OUTPUT
                   else
                     echo "changed=true" >> $GITHUB_OUTPUT
