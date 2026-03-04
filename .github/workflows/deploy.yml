@@ -90,7 +90,7 @@ jobs:
                 usedocker: false
                 healthcheck: "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e/api/getUrl"
                 checkstring: ""
-                delay: 20
+                # delay: 20
                 rollbackonhealthcheckfailed: true
             
     #변경사항 없으면 서버만 재시작    
