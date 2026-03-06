@@ -59,6 +59,7 @@ jobs:
               with:
                 name: restApi-jar
                 path: build/libs/restApi.jar
+                retention-days: 7 #으얼티 팩트 보관 7일
     
           
     deploy:
