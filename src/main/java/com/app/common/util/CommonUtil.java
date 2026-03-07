@@ -9,27 +9,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.CaseFormat;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import lombok.experimental.UtilityClass;
+
 @SuppressWarnings("unchecked")
+@UtilityClass
 public class CommonUtil {
     
-    private static final ObjectMapper om = new ObjectMapper(); 
+	public final ObjectMapper om = new ObjectMapper()
+			.registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     
-    private static final ModelMapper mapper = new ModelMapper();
+    private final ModelMapper mapper = new ModelMapper();
 
-    private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CASE_WITH_UNDERSCORES).create();
+    private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CASE_WITH_UNDERSCORES).create();
     
     
     /**
@@ -40,7 +47,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 3. 7.
      */
-    public static String strPaging(int curPage, int pageSize) {
+    public String strPaging(int curPage, int pageSize) {
         String rtnValue = "";
 
         int perPage = (pageSize == -1 || pageSize >= 500) ? 500 : pageSize;
@@ -61,7 +68,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 3. 20.
      */
-    public static String convertCamelToSnake(String str) {
+    public String convertCamelToSnake(String str) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, str);
     }
     
@@ -73,7 +80,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 3. 20.
      */
-    public static String convertSnakeToCamel(String str) {
+    public String convertSnakeToCamel(String str) {
         return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str);
     }
     
@@ -85,7 +92,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 3. 25.
      */
-    public static <S, D> List<D> convertList(List<S> sourceDataList, Class<D> destinationClass) {
+    public <S, D> List<D> convertList(List<S> sourceDataList, Class<D> destinationClass) {
         if (sourceDataList == null || sourceDataList.isEmpty()) {
             return new ArrayList<>();
         }
@@ -102,7 +109,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 3. 25.
      */
-    public static <S, D> D convertObject(S sourceData, Class<D> destinationClass) {
+    public <S, D> D convertObject(S sourceData, Class<D> destinationClass) {
         if (ObjectUtils.isEmpty(sourceData) || sourceData == null) return null;
         return om.convertValue(sourceData, destinationClass);
     }
@@ -116,7 +123,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 4. 8.
      */
-    public static <S, D> D copyBean(S sourceData, D target) {
+    public <S, D> D copyBean(S sourceData, D target) {
         BeanUtils.copyProperties(sourceData, target);
         return target;
     }
@@ -129,7 +136,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 4. 9.
      */
-    public static <T> Map<String, Object> convertMap(T o) {
+    public <T> Map<String, Object> convertMap(T o) {
         HashMap<String, Object> returnMap = null;
         
         if (o instanceof Map) {
@@ -152,7 +159,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 4. 23.
      */
-    public static <T> T mapParamConvert(T o) {
+    public <T> T mapParamConvert(T o) {
         Map<String, Object> returnMap = null;
         
         if (o instanceof Map) {
@@ -178,7 +185,7 @@ public class CommonUtil {
      * @throws UnsupportedEncodingException 
      * @date 2024. 3. 15.
      */
-    public static String getQureyParam(String url, String kwd, Object o) throws UnsupportedEncodingException {
+    public String getQureyParam(String url, String kwd, Object o) throws UnsupportedEncodingException {
         kwd = URLEncoder.encode(kwd, StandardCharsets.UTF_8.toString());
         
         Map<String, Object> m = om.convertValue(o, HashMap.class);
@@ -199,7 +206,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 3. 16.
      */
-    public static String getQureyParam(String url, Object o) throws UnsupportedEncodingException {
+    public String getQureyParam(String url, Object o) throws UnsupportedEncodingException {
         Map<String, Object> m = om.convertValue(o, HashMap.class);
         UriComponentsBuilder p = UriComponentsBuilder.fromUriString(url);
         
@@ -219,7 +226,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 5. 8.
      */
-    public static String decimalFormat(double d, int len) {
+    public String decimalFormat(double d, int len) {
         String lenStr = "0.";
         for (int i = 0; i < len; i++) {
             lenStr = lenStr.concat("0");
@@ -236,7 +243,7 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 5. 22.
      */
-    public static String decapitalize(String str) {
+    public String decapitalize(String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
@@ -251,10 +258,21 @@ public class CommonUtil {
      * @author guney
      * @date 2024. 5. 22.
      */
-    public static String capitalize(String str) {
+    public String capitalize(String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
         return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+    
+    /**
+     * 널을 체크
+     * @param str
+     * @return boolean
+     * @author guney
+     * @date 2026. 3. 7.
+     */
+    public boolean stringisBlankOrNull(String str) {
+        return StringUtils.isBlank(str) || "null".equalsIgnoreCase(str);
     }
 }

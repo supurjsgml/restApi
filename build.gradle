@@ -7,6 +7,10 @@ plugins {
 group = 'com.app'
 version = '0.0.1-SNAPSHOT'
 
+ext {
+    mapstructVersion = '1.5.5.Final'
+}
+
 java {
 	sourceCompatibility = '21'
 }
@@ -39,17 +43,26 @@ dependencies {
     implementation 'org.aspectj:aspectjweaver'
     implementation 'io.github.classgraph:classgraph:4.8.173'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	
 	compileOnly 'org.projectlombok:lombok'
 	
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	//testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
 
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs = [
+        '-Amapstruct.defaultComponentModel=spring'
+    ]
 }
 
 tasks.named('test') {
