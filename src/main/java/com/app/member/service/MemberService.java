@@ -9,4 +9,6 @@ public interface MemberService {
     
     public Map<String ,String> jobKoreaLogin(MemberReqDTO memberReqDTO) throws ValidException;
     
+    public void jobKoreaLogout(MemberReqDTO memberReqDTO);
+    
 }

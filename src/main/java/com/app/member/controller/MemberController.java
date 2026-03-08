@@ -34,12 +34,13 @@ public class MemberController {
 	private final MemberService memberService;
 	
 	@ApiDocumentResponse
-    @Operation(summary = "쥅코리아 이력서 갱신", description = "")
+    @Operation(summary = "쥅코리아 이력서 갱신", description = "쥅코리아 이력서 갱신한드아")
     @PostMapping(value = "/jobKorea/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiBodyDTO.Response<Map<String ,String>> getFileInfo(HttpServletRequest request, @RequestBody MemberReqDTO memberReqDTO){
+    public ApiBodyDTO.Response<Map<String ,String>> jobKoreaLogin(HttpServletRequest request, @RequestBody MemberReqDTO memberReqDTO){
 	    ApiBodyDTO.Response<Map<String ,String>> result = null;
-    	try {
-    	    result = ApiResUtil.success(memberService.jobKoreaLogin(memberReqDTO), HeaderSuccess.builder().build(), MessageEnum.SUCCESS.getCode());
+    	
+	    try {
+    	    result = ApiResUtil.success(memberService.jobKoreaLogin(memberReqDTO), MessageEnum.SUCCESS.getCode());
     	} catch (ValidException e) {
     		result = ApiResUtil.failed(e.getMessage());
     	} catch (Exception e) {
@@ -49,5 +50,21 @@ public class MemberController {
     	
     	return result;
     }
+	
+	@ApiDocumentResponse
+	@Operation(summary = "쥅코리아 이력서 갱신 중지", description = "쥅코리아 이력서 갱신 중지한드아")
+	@PostMapping(value = "/jobKorea/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ApiBodyDTO.Response<Object> jobKoreaLogout(HttpServletRequest request, @RequestBody MemberReqDTO memberReqDTO){
+		ApiBodyDTO.Response<Object> result = ApiResUtil.success();
+		
+		try {
+			memberService.jobKoreaLogout(memberReqDTO);
+		}catch (Exception e) {
+			log.error("MemberController Exception ERROR : {}", e.getMessage());
+			result = ApiResUtil.failed(MessagesUtils.getMessage(MessageEnum.INTERNAL_SERVER_ERROR.getCode()));
+		}
+		
+		return result;
+	}
 
 }

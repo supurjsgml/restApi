@@ -40,6 +40,14 @@ public class WebClientUtil {
                 .retrieve()
                 .bodyToMono(responseType);
     }
+    
+    //POST (비동기)
+    public <T, V> Mono<T> postAsync(String url, Class<T> responseType) {
+    	return webClient.post()
+    			.uri(url)
+    			.retrieve()
+    			.bodyToMono(responseType);
+    }
 
     //POST (동기)
     public <T, V> T postSync(String url, V requestBody, Class<T> responseType) {

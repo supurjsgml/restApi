@@ -12,7 +12,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.stereotype.Service;
 
-import com.app.common.constant.CommonConstant;
+import com.app.common.constants.CommonConstants;
 import com.app.common.dto.req.FileGenReqDTO;
 import com.app.common.enums.TemplatesEnum;
 import com.app.common.exception.DataCustomException;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CommonServiceImpl implements CommonService {
 
-    private final CommonConstant commonConstant;
+    private final CommonConstants commonConstants;
     
     private final VelocityEngine velocityEngine;
     
@@ -49,7 +49,7 @@ public class CommonServiceImpl implements CommonService {
         try {
             String fileNm = CommonUtil.capitalize(fileGenReqDTO.getFileNm());
             String dtoNm = CommonUtil.capitalize(fileNm).concat(TemplatesEnum.DTO.getFileNm());
-            String filePathParam = StringUtils.isBlank(fileGenReqDTO.getFilePath()) ? commonConstant.FILE_PATH : fileGenReqDTO.getFilePath();
+            String filePathParam = StringUtils.isBlank(fileGenReqDTO.getFilePath()) ? commonConstants.FILE_PATH : fileGenReqDTO.getFilePath();
 //            String filePathParam = commonConstant.FILE_PATH;
             
             for (TemplatesEnum tpl : TemplatesEnum.values()) {
@@ -108,7 +108,7 @@ public class CommonServiceImpl implements CommonService {
         
         String fileNm = CommonUtil.capitalize(fileGenReqDTO.getFileNm());
         String dtoNm = CommonUtil.capitalize(fileNm).concat(TemplatesEnum.DTO.getFileNm());
-        String filePathParam = StringUtils.isBlank(fileGenReqDTO.getFilePath()) ? commonConstant.FILE_PATH : fileGenReqDTO.getFilePath();
+        String filePathParam = StringUtils.isBlank(fileGenReqDTO.getFilePath()) ? commonConstants.FILE_PATH : fileGenReqDTO.getFilePath();
         
         for (TemplatesEnum tpl : TemplatesEnum.values()) {
             VelocityContext context = new VelocityContext();
