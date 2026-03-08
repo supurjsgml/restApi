@@ -26,11 +26,11 @@ public class WebClientConfig {
                 //연결 타임아웃
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000) 
                 //응답 타임아웃
-                .responseTimeout(Duration.ofSeconds(5))
+                .responseTimeout(Duration.ofSeconds(30))
                 //읽기/쓰기 타임아웃 추가
                 .doOnConnected(conn -> conn
                         .addHandlerLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.SECONDS)));
+                        .addHandlerLast(new WriteTimeoutHandler(30, TimeUnit.SECONDS)));
 
         //WebClient 빌드
         return builder
