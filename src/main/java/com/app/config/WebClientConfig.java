@@ -24,7 +24,7 @@ public class WebClientConfig {
         //커넥션 풀 및 타임아웃 상세 설정
         HttpClient httpClient = HttpClient.create()
                 //연결 타임아웃
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) 
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000) 
                 //응답 타임아웃
                 .responseTimeout(Duration.ofSeconds(5))
                 //읽기/쓰기 타임아웃 추가
