@@ -27,8 +27,8 @@ public class MemberServiceImpl implements MemberService {
 				.bodyValue(memberReqDTO)
 		        .retrieve()
 		        .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
-		        .doOnSuccess(response -> log.info("배치서버 통신 성공" + response))
-		        .doOnError(error -> log.info("배치서버 통신 실패: " + error.getMessage()))
+		        .doOnSuccess(response -> log.info("배치서버 통신 성공 ID : {}, response : {}", memberReqDTO.getId(), response))
+		        .doOnError(error -> log.info("배치서버 통신 실패 : {}", error.getMessage()))
 		        .block(); // 동기 실행
 		
 		if (ObjectUtils.isNotEmpty(res) && ObjectUtils.isNotEmpty(res.get("errCode"))) {
