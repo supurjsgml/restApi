@@ -19,14 +19,18 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 @Slf4j
 public class DateUtils {
-    public static final DateTimeFormatter YYYYMMDD_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
     
-    public static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
-    
-    public static final String YYYYMMDD_TIME_STR = "yyyy-MM-dd HH:mm:ss";
+    public final String YYYYMMDD_TIME_STR = "yyyy-MM-dd HH:mm:ss";
 
-    public static final String YYYYMMDD_STR = "yyyy-MM-dd";
+    public final String YYYYMMDD_STR = "yyyy-MM-dd";
     
+    public final DateTimeFormatter YYYY_MM_DD_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
+    
+    public final DateTimeFormatter YYYY_MM_DD = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.KOREA);
+	
+    public final DateTimeFormatter YYYYMMDDTIME = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss", Locale.KOREA);
+    
+    public final DateTimeFormatter YYYYMMDD = DateTimeFormatter.ofPattern("yyyyMMdd", Locale.KOREA);
     
     /**
      * LocalDateTime 현재날짜
@@ -57,7 +61,7 @@ public class DateUtils {
             return LocalDateTime.now().format(DateTimeFormatter.ofPattern(format, Locale.KOREA));
         }
         
-        return LocalDateTime.now().format(YYYYMMDD_TIME);
+        return LocalDateTime.now().format(YYYY_MM_DD_TIME);
     }
     
     /**
@@ -70,7 +74,7 @@ public class DateUtils {
      */
     public LocalDateTime localDateTimeParse(String date) {
         if (StringUtils.isBlank(date)) return null;
-        return LocalDateTime.parse(date, YYYYMMDD_TIME);
+        return LocalDateTime.parse(date, YYYY_MM_DD_TIME);
     }
     
     /**
@@ -126,20 +130,7 @@ public class DateUtils {
             return LocalDate.now().format(DateTimeFormatter.ofPattern(format, Locale.KOREA));
         }
         
-        return LocalDate.now().format(YYYYMMDD);
-    }
-    
-    /**
-     * LocalDate Parse
-     * 
-     * @param String date
-     * @return LocalDateTime
-     * @author guney
-     * @date 2024. 5. 17.
-     */
-    public LocalDate localDateParse(String date) {
-        if (StringUtils.isBlank(date)) return null;
-        return LocalDate.parse(date, YYYYMMDD);
+        return LocalDate.now().format(YYYY_MM_DD_TIME);
     }
     
     /**
@@ -167,9 +158,7 @@ public class DateUtils {
             return null;
         }
 
-        return Date
-                .from(localDateTime.atZone(ZoneId.systemDefault())
-                        .toInstant());
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     /**
@@ -212,6 +201,55 @@ public class DateUtils {
     public LocalDateTime toLocalDateTime(long time) {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(time),
                 TimeZone.getDefault().toZoneId());
+    }
+    
+    /**
+     * yyyy-MM-dd 형식의 String > LocalDate 변환
+     * @param date
+     * @return LocalDate
+     * @user guney
+     * @date 2025. 12. 23.
+     */
+    public static LocalDate localDateParse(String date) {
+    	if (StringUtils.isBlank(date)) return null;
+    	return LocalDate.parse(date, YYYY_MM_DD);
+    }
+    
+    /**
+     * yyyy-MM-dd HH:mm:ss 형식의 LocalDateTime > String 변환
+     * @param date
+     * @return LocalDateTime
+     * @user guney
+     * @date 2025. 12. 15.
+     */
+    public static String localDateTimeToString(LocalDateTime date) {
+    	if (date == null) return null;
+    	return date.format(YYYY_MM_DD_TIME);
+    }
+    
+    /**
+     * yyyy-MM-dd 형식의 LocalDateTime > String 변환
+     * @param date
+     * @return LocalDate
+     * @user guney
+     * @date 2025. 12. 23.
+     */
+    public static String localDateToString(LocalDate date) {
+    	if (date == null) return null;
+    	return date.format(YYYY_MM_DD);
+    }
+    
+    /**
+     * 날짜 입맛대로 포맷
+     * @param date
+     * @param format
+     * @return String
+     * @user guney
+     * @date 2026. 2. 15.
+     */
+    public static String localDateTimeToString(LocalDateTime date, String format) {
+    	if (date == null) return null;
+    	return date.format(DateTimeFormatter.ofPattern(format));
     }
 
     /**
