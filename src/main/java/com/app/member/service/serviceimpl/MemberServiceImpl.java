@@ -42,7 +42,7 @@ public class MemberServiceImpl implements MemberService {
 	}
 	
 	public void jobKoreaLogout(MemberReqDTO memberReqDTO) {
-		webClientUtil.postAsync(restApiProperties.getBatch().getBaseUrl().concat("/api/quartz/pause?triggerName=").concat(memberReqDTO.getId()).concat("&groupName=userGroup"), HashMap.class)
+		webClientUtil.postAsync(restApiProperties.getBatch().getBaseUrl().concat("/api/quartz/pause?triggerName=").concat(memberReqDTO.getId()).concat("&groupName=userGroup"), Void.class)
 					 .subscribe();
 	}
 
