@@ -76,4 +76,40 @@ public class WebClientUtil {
                 .collectList()// Flux의 모든 데이터를 모아 Mono<List<T>>로 변환
                 .block();
     }
+    
+    /**
+     * N개의 API 병렬 호출 후 모노 리스트 합칠 때 써
+     * @param <T>
+     * @param monos
+     * @author guney
+     * @date 2026. 3. 17.
+     */
+    public <T> Mono<List<T>> getAsyncMany(List<Mono<T>> monos) {
+        if (monos == null || monos.isEmpty()) {
+            return Mono.just(List.of());
+        }
+
+        return Flux.fromIterable(monos)
+                .flatMap(mono -> mono) //병렬 실행
+                .collectList();
+    }
+
+    /**
+     * 동시 실행 개수를 제한하고 싶을 때 써
+     * @param <T>
+     * @param monos
+     * @param maxConcurrency : 사용할 커넥션 풀 개수
+     * @author guney
+     * @date 2026. 3. 17.
+     */
+    public <T> Mono<List<T>> getAsyncMany(List<Mono<T>> monos, int maxConcurrency) {
+        if (monos == null || monos.isEmpty()) {
+            return Mono.just(List.of());
+        }
+
+        return Flux.fromIterable(monos)
+                .flatMap(mono -> mono, maxConcurrency)
+                .collectList();
+    }
+    
 }
