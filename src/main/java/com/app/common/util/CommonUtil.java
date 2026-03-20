@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -112,6 +113,27 @@ public class CommonUtil {
     public <S, D> D convertObject(S sourceData, Class<D> destinationClass) {
         if (ObjectUtils.isEmpty(sourceData) || sourceData == null) return null;
         return om.convertValue(sourceData, destinationClass);
+    }
+    
+    /**
+     * 문자열 객체 변환
+     * @param <D>
+     * @param stringData
+     * @param destinationClass
+     * @return
+     * @author guney
+     * @date 2026. 3. 20.
+     */
+    public <D> D readValue(String stringData, Class<D> destinationClass) {
+    	if (ObjectUtils.isEmpty(stringData) || stringData == null) return null;
+    	
+    	try {
+			return om.readValue(stringData, destinationClass);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+    	
+    	return null;
     }
     
     /**

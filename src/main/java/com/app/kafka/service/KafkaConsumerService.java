@@ -1,0 +1,24 @@
+package com.app.kafka.service;
+
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+import com.app.common.util.CommonUtil;
+import com.app.member.dto.req.MemberReqDTO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class KafkaConsumerService {
+	
+	@KafkaListener(topics = "restApi")
+	public void restApiConsume(String message) {
+		log.info("restApi kafka message : {}", message);
+	}
+
+    @KafkaListener(topics = "QuartzJob")
+    public void quartzJobConsume(String message) {
+        log.info("QuartzJob kafka message : {}", CommonUtil.readValue(message, MemberReqDTO.class));
+    }
+}
