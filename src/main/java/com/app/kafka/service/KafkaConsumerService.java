@@ -13,11 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 public class KafkaConsumerService {
 	
 	@KafkaListener(topics = "restApi")
-	public void restApiConsume(String message) {
-		log.info("restApi kafka message : {}", message);
+	public void restApiConsume(MemberReqDTO memberReqDTO) {
+		log.info("restApi kafka message : {}", memberReqDTO);
 	}
 
-    @KafkaListener(topics = "QuartzJob")
+//    @KafkaListener(topics = "QuartzJob")
     public void quartzJobConsume(String message) {
         log.info("QuartzJob kafka message : {}", CommonUtil.readValue(message, MemberReqDTO.class));
     }

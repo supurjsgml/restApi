@@ -11,6 +11,7 @@ import com.app.common.dto.ApiDocumentResponseDTO.Success.HeaderSuccess;
 import com.app.common.enums.MessageEnum;
 import com.app.common.util.ApiResUtil;
 import com.app.kafka.service.KafkaProducerService;
+import com.app.member.dto.req.MemberReqDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +29,7 @@ public class KafkaController {
     @Operation(summary = "카프카 전송", description = "토픽에 적재 할거지롱")
     @GetMapping("/send")
     public ApiBodyDTO.Response<Object> send(@RequestParam String msg) {
-    	kafkaProducerService.sendMessage("restApi", msg);
+    	kafkaProducerService.sendMessage("restApi", MemberReqDTO.builder().id(msg).pw("???").build());
         return ApiResUtil.success(msg, HeaderSuccess.builder().build(), MessageEnum.SUCCESS.getCode());
     }
 }
