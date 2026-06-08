@@ -1,6 +1,7 @@
 package com.app.internal.service.serviceimpl;
 
 import com.app.internal.dto.DashboardStatsDTO;
+import com.app.internal.dto.PageVisitsDTO;
 import com.app.internal.service.FrontService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +18,64 @@ import java.util.*;
 public class FrontServiceImpl implements FrontService {
 
     private final StringRedisTemplate redisTemplate;
-    private static final String KEY_PREFIX = "visitor_count:";
+    private static final String DAILY_KEY_PREFIX = "visitor_count:";
+    private static final String PAGE_VISITS_KEY = "page_visits";
 
     @Override
-    public void incrementVisitorCount() {
-        String todayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String key = KEY_PREFIX + todayStr;
+    public void incrementVisitorCount(String pageName, boolean isNewSession) {
         try {
-            Long current = redisTemplate.opsForValue().increment(key, 1L);
-            log.info("오늘 방문자 수 증가: {} -> {}", todayStr, current);
+            // 1. 페이지별 누적 방문수 증가 (항상 실행)
+            if (pageName != null && !pageName.trim().isEmpty()) {
+                redisTemplate.opsForHash().increment(PAGE_VISITS_KEY, pageName, 1L);
+                log.info("페이지 뷰 증가: {} +1", pageName);
+            }
+
+            // 2. 신규 세션일 경우 일자별 전체 방문수 증가
+            if (isNewSession) {
+                String todayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                String dailyKey = DAILY_KEY_PREFIX + todayStr;
+                Long current = redisTemplate.opsForValue().increment(dailyKey, 1L);
+                log.info("신규 세션 - 오늘 전체 방문자 수 증가: {} -> {}", todayStr, current);
+            }
         } catch (Exception e) {
             log.error("Redis 방문자 카운트 증가 중 오류 발생: {}", e.getMessage());
+        }
+    }
+
+    @Override
+    public PageVisitsDTO getPageVisits() {
+        int main = 0;
+        int camel = 0;
+        int grafana = 0;
+        int google = 0;
+        int statsVal = 0;
+
+        try {
+            Map<Object, Object> entries = redisTemplate.opsForHash().entries(PAGE_VISITS_KEY);
+            main = parseCount(entries.get("Main"));
+            camel = parseCount(entries.get("Camel"));
+            grafana = parseCount(entries.get("Grafana"));
+            google = parseCount(entries.get("Google"));
+            statsVal = parseCount(entries.get("Stats"));
+        } catch (Exception e) {
+            log.error("Redis 페이지 방문자 조회 중 오류 발생: {}", e.getMessage());
+        }
+
+        return PageVisitsDTO.builder()
+                .main(main)
+                .camel(camel)
+                .grafana(grafana)
+                .google(google)
+                .stats(statsVal)
+                .build();
+    }
+
+    private int parseCount(Object value) {
+        if (value == null) return 0;
+        try {
+            return Integer.parseInt((String) value);
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 
@@ -44,7 +92,7 @@ public class FrontServiceImpl implements FrontService {
         // 최근 7일치 키 목록 생성
         List<String> keys = new ArrayList<>();
         for (int i = 6; i >= 0; i--) {
-            keys.add(KEY_PREFIX + today.minusDays(i).format(keyFormatter));
+            keys.add(DAILY_KEY_PREFIX + today.minusDays(i).format(keyFormatter));
         }
 
         List<String> rawValues = null;
@@ -92,7 +140,7 @@ public class FrontServiceImpl implements FrontService {
         return DashboardStatsDTO.builder()
                 .label("주간 방문자 (1주)")
                 .value(String.format("%,d", total))
-                .description("낄낄")
+//                .description("실시간 업스태시 서버리스 Redis 연동 중")
                 .trend(trend)
                 .trendDirection(trendDirection)
                 .sparklineValues(values)

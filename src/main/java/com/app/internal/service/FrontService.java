@@ -1,6 +1,7 @@
 package com.app.internal.service;
 
 import com.app.internal.dto.DashboardStatsDTO;
+import com.app.internal.dto.PageVisitsDTO;
 
 public interface FrontService {
     /**
@@ -9,7 +10,12 @@ public interface FrontService {
     DashboardStatsDTO getDashboardStats();
 
     /**
-     * 오늘 방문자 수 카운트 증가
+     * 페이지 방문자 수 및 신규 세션 여부에 따른 전체 방문자 수 증가
      */
-    void incrementVisitorCount();
+    void incrementVisitorCount(String pageName, boolean isNewSession);
+
+    /**
+     * 페이지별 누적 방문자 수 목록 조회
+     */
+    PageVisitsDTO getPageVisits();
 }
