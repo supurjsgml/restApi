@@ -1,6 +1,13 @@
 spring:
   application:
     name: rest-api
+  data:
+    redis:
+      host: ${REDIS_HOST:뭐게요~!}
+      port: ${REDIS_PORT:9999}
+      password: ${REDIS_TOKEN:낄낄}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}
   profiles:
     active:
     - local
