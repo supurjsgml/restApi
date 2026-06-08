@@ -1,5 +1,7 @@
 package com.app.internal.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +18,7 @@ public class VisitorHitReqDTO {
     @Schema(description = "페이지 이름", example = "Main")
     private String pageName;
 
+    @JsonProperty("isNewSession")
     @Schema(description = "신규 세션 여부", example = "false")
     private boolean isNewSession;
 }
