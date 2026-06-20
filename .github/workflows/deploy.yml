@@ -66,6 +66,9 @@ jobs:
         needs: [check, build]
         if: needs.check.outputs.changed == 'true'
         runs-on: ubuntu-latest
+        
+        environment: redoc
+        
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
