@@ -128,7 +128,7 @@ spring:
       - prod
       
 server:
-  port: ${port:80}
+  port: ${port:8080}
   
 rest-api:
   batch:
