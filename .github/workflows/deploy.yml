@@ -120,7 +120,7 @@ jobs:
                   cd /home/ubuntu/rest-api
                   
                   # PM2를 이용하여 Java API를 prod 프로필로 실행 및 무중단 재시작
-                  (pm2 reload "rest-api" --update-env || pm2 start "java -jar -Dspring.profiles.active=prod restApi.jar" --name "rest-api") && pm2 save
+                  (REDIS_HOST="${{ secrets.REDIS_HOST }}" REDIS_PORT="${{ secrets.REDIS_PORT }}" REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" pm2 reload "rest-api" --update-env || REDIS_HOST="${{ secrets.REDIS_HOST }}" REDIS_PORT="${{ secrets.REDIS_PORT }}" REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" pm2 start "java -jar -Dspring.profiles.active=prod restApi.jar" --name "rest-api") && pm2 save
             
     #변경사항 없으면 서버만 재시작    
     restart:
