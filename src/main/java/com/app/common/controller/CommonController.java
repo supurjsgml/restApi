@@ -44,7 +44,7 @@ public class CommonController {
 	    
 		try {
 			commonService.createPackage(response, fileGenReqDTO);
-		} catch (ValidException e) {
+		} catch (ValidException e) { 
 			log.error("CommonController failDownload ERROR : {}", e.getMessage());
 			
 			header.setMessage(e.getMessage());
