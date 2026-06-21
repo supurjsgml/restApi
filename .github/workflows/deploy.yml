@@ -80,22 +80,47 @@ jobs:
                 name: restApi-jar
                 path: build/libs/
                 
-            #헤로쿠 cli 설치
-            - name: Install Heroku CLI
-              run: curl https://cli-assets.heroku.com/install.sh | sh
+            # 헤로쿠 CLI 설치 (기존 스크립트 백업용 주석 처리)
+            # - name: Install Heroku CLI
+            #   run: curl https://cli-assets.heroku.com/install.sh | sh
             
-            #Heroku 배포
-            - name: Deploy to Heroku
-              uses: akhileshns/heroku-deploy@v3.13.15
+            # Heroku 배포 (기존 스크립트 백업용 주석 처리)
+            # - name: Deploy to Heroku
+            #   uses: akhileshns/heroku-deploy@v3.13.15
+            #   with:
+            #     heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+            #     heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+            #     heroku_email: ${{ secrets.HEROKU_EMAIL }}
+            #     usedocker: false
+            #     healthcheck: "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e/api/getUrl"
+            #     checkstring: ""
+            #     # delay: 20
+            #     rollbackonhealthcheckfailed: true
+
+            # Lightsail로 JAR 파일 전송 (SCP)
+            - name: Copy Jar to Lightsail
+              uses: appleboy/scp-action@v0.1.7
               with:
-                heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-                heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-                heroku_email: ${{ secrets.HEROKU_EMAIL }}
-                usedocker: false
-                healthcheck: "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e/api/getUrl"
-                checkstring: ""
-                # delay: 20
-                rollbackonhealthcheckfailed: true
+                host: ${{ secrets.LIGHTSAIL_HOST }}
+                username: ${{ secrets.LIGHTSAIL_USERNAME }}
+                key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+                source: "build/libs/restApi.jar"
+                target: "/home/ubuntu/rest-api"
+                strip_components: 2 # build/libs/ 경로 구조 제거하고 파일만 전송
+
+            # Lightsail 서버에서 PM2로 Java API 백그라운드 구동
+            - name: SSH to Lightsail and deploy Java API
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                host: ${{ secrets.LIGHTSAIL_HOST }}
+                username: ${{ secrets.LIGHTSAIL_USERNAME }}
+                key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+                script: |
+                  mkdir -p /home/ubuntu/rest-api
+                  cd /home/ubuntu/rest-api
+                  
+                  # PM2를 이용하여 Java API를 prod 프로필로 실행 및 무중단 재시작
+                  (pm2 reload "rest-api" --update-env || pm2 start "java -jar -Dspring.profiles.active=prod restApi.jar" --name "rest-api") && pm2 save
             
     #변경사항 없으면 서버만 재시작    
     restart:
@@ -103,9 +128,19 @@ jobs:
         if: needs.check.outputs.changed == 'false'
         runs-on: ubuntu-latest
         steps:
-            - name: Install Heroku CLI
-              run: curl https://cli-assets.heroku.com/install.sh | sh
-            - name: Restart Heroku Dynos
-              run: heroku ps:restart -a ${{ secrets.HEROKU_APP_NAME }}
-              env:
-                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            # 헤로쿠 재시작 (기존 스크립트 백업용 주석 처리)
+            # - name: Install Heroku CLI
+            #   run: curl https://cli-assets.heroku.com/install.sh | sh
+            # - name: Restart Heroku Dynos
+            #   run: heroku ps:restart -a ${{ secrets.HEROKU_APP_NAME }}
+            #   env:
+            #       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+            - name: SSH to Lightsail and restart PM2
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                host: ${{ secrets.LIGHTSAIL_HOST }}
+                username: ${{ secrets.LIGHTSAIL_USERNAME }}
+                key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+                script: |
+                  pm2 restart "rest-api"

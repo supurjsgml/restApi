@@ -23,6 +23,7 @@ public class SecurityConfig {
 	//허용 도메인 목록
 	private final List<String> ALLOWED = List.of("https://vue-front-807ffc6b572e.herokuapp.com"
 											   , "https://guney.kro.kr"
+											   , "https://xn--v69a93jfng.xn--yq5b.xn--3e0b707e"
                                                , "chrome-extension://ilaafkabnbkdgaieedckdnfkmapocimc"
                                                , "chrome-extension://chjbcemdkiommdpeklplkbfpemefejcp"
 //                                               , "http://localhost"
