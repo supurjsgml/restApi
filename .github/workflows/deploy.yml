@@ -155,6 +155,7 @@ jobs:
                 username: ${{ secrets.LIGHTSAIL_USERNAME }}
                 key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
                 script: |
+                  cd /home/ubuntu/rest-api
                   PORT_A="8080" \
                   PORT_B="9080" \
                   REDIS_HOST="${{ secrets.REDIS_HOST }}" \

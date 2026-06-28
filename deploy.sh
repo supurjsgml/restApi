@@ -45,7 +45,7 @@ fi
 # 3. 타겟 포트로 새 JAR 파일 구동
 echo ">> 타겟 포트($TARGET_PORT)로 신규 JAR 기동 시작..."
 # deploy.yml 등에서 넘겨받은 기존 환경변수들을 그대로 사용하여 백그라운드 구동
-nohup java -jar -Dserver.port=$TARGET_PORT -Dspring.profiles.active=prod restApi.jar > /home/ubuntu/rest-api/nohup.out 2>&1 &
+nohup java -jar -Dserver.port=$TARGET_PORT -Dspring.profiles.active=prod /home/ubuntu/rest-api/restApi.jar > /home/ubuntu/rest-api/nohup.out 2>&1 &
 
 # 4. 새 서버 헬스체크 (정상 구동될 때까지 최대 30초 대기)
 echo ">> 신규 서버 헬스체크 시작 (http://localhost:$TARGET_PORT)..."
