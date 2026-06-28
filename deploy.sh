@@ -79,7 +79,8 @@ sudo sed -i "s/localhost:$CURRENT_PORT/localhost:$TARGET_PORT/g" /etc/nginx/site
 
 # Nginx 무중단 설정 리로드
 sudo systemctl reload nginx
-echo ">> Nginx 설정 리로드 완료."
+echo ">> Nginx 설정 리로드 완료. 라우팅 전환 유예를 위해 15초간 대기합니다..."
+sleep 15
 
 # 6. 이전 버전 포트 프로세스 안전하게 종료
 echo ">> 이전 버전 프로세스($CURRENT_PORT) 순차 종료 중..."
@@ -87,7 +88,8 @@ CURRENT_PID=$(lsof -t -i :$CURRENT_PORT)
 if [ ! -z "$CURRENT_PID" ]; then
     # Graceful Shutdown 유도를 위해 SIGTERM(15) 전송 후 대기
     kill -15 $CURRENT_PID
-    sleep 5
+    echo ">> Graceful Shutdown 진행 중... 10초 대기"
+    sleep 10
     
     # 여전히 안 꺼졌다면 강제 종료(SIGKILL)
     REMAIN_PID=$(lsof -t -i :$CURRENT_PORT)
