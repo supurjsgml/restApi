@@ -39,6 +39,11 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
   
+key:
+  kakao:
+    clientId: 뭐게요
+    clientSecret: 뭘까
+
 server:
   port: ${port:8080}
   compression:
@@ -102,7 +107,15 @@ spring:
 rest-api:
   batch:
     baseUrl: http://localhost:8081
-  
+  kakao:
+    v2: /v2
+    api:
+      baseUrl: https://kapi.kakao.com
+      memo: "${rest-api.kakao.api.baseUrl}${rest-api.kakao.v2}/api/talk/memo/default/send"
+    auth:
+      baseUrl: https://kauth.kakao.com
+      token: ${rest-api.kakao.auth.baseUrl}/oauth/token
+
 
 ---
 
@@ -115,9 +128,22 @@ spring:
 server:
   port: ${port:8080}
 
+key:
+  kakao:
+    clientId: "${KAKAO_CLIENT_ID}"
+    clientSecret: "${KAKAO_CLIENT_SECRET}"
+
 rest-api:
   batch:
     baseUrl: https://guney-batch.kro.kr
+  kakao:
+    v2: /v2
+    api:
+      baseUrl: https://kapi.kakao.com
+      memo: "${rest-api.kakao.api.baseUrl}${rest-api.kakao.v2}/api/talk/memo/default/send"
+    auth:
+      baseUrl: https://kauth.kakao.com
+      token: ${rest-api.kakao.auth.baseUrl}/oauth/token
 
 ---
 
@@ -129,7 +155,20 @@ spring:
       
 server:
   port: ${port:8080}
-  
+
+key:
+  kakao:
+    clientId: "${KAKAO_CLIENT_ID}"
+    clientSecret: "${KAKAO_CLIENT_SECRET}"
+
 rest-api:
   batch:
     baseUrl: https://guney-batch.kro.kr
+  kakao:
+    v2: /v2
+    api:
+      baseUrl: https://kapi.kakao.com
+      memo: "${rest-api.kakao.api.baseUrl}${rest-api.kakao.v2}/api/talk/memo/default/send"
+    auth:
+      baseUrl: https://kauth.kakao.com
+      token: ${rest-api.kakao.auth.baseUrl}/oauth/token
