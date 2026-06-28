@@ -148,11 +148,19 @@ jobs:
             #   env:
             #       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-            - name: SSH to Lightsail and restart PM2
+            - name: SSH to Lightsail and restart
               uses: appleboy/ssh-action@v1.0.3
               with:
                 host: ${{ secrets.LIGHTSAIL_HOST }}
                 username: ${{ secrets.LIGHTSAIL_USERNAME }}
                 key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
                 script: |
-                  pm2 restart "rest-api"
+                  PORT_A="8080" \
+                  PORT_B="9080" \
+                  REDIS_HOST="${{ secrets.REDIS_HOST }}" \
+                  REDIS_PORT="${{ secrets.REDIS_PORT }}" \
+                  REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
+                  KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+                  KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
+                  KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
+                  /home/ubuntu/rest-api/deploy.sh
