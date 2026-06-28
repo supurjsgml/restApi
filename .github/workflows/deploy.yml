@@ -22,7 +22,7 @@ jobs:
                   # 깃허브 API로 마지막으로 성공한 워크플로우 실행의 커밋 SHA 획득
                   PREV_SHA=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
                     "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=completed&conclusion=success&per_page=1" \
-                    | jq -r '.workflow_runs[0].head_sha || empty')
+                    | jq -r '.workflow_runs[0].head_sha')
                   
                   if [ -z "$PREV_SHA" ] || [ "$PREV_SHA" = "null" ]; then
                     echo ">> 이전 성공 빌드 이력이 없어 직전 커밋(HEAD^)과 비교합니다."
