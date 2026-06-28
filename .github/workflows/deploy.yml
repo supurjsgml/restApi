@@ -51,15 +51,17 @@ jobs:
         
             #프로젝트 빌드
             - name: Build with Gradle
-              run: ./gradlew clean bootJar -x test
+              run: |
+                ./gradlew clean bootJar -x test
+                cp deploy.sh build/libs/
             
             #자르 생성
             - name: Upload Build 좌르
               uses: actions/upload-artifact@v4
               with:
                 name: restApi-jar
-                path: build/libs/restApi.jar
-                retention-days: 1 #으얼티 팩트 보관 7일
+                path: build/libs/
+                retention-days: 1
     
           
     deploy:
@@ -104,7 +106,7 @@ jobs:
                 host: ${{ secrets.LIGHTSAIL_HOST }}
                 username: ${{ secrets.LIGHTSAIL_USERNAME }}
                 key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-                source: "build/libs/restApi.jar"
+                source: "build/libs/restApi.jar,build/libs/deploy.sh"
                 target: "/home/ubuntu/rest-api"
                 strip_components: 2 # build/libs/ 경로 구조 제거하고 파일만 전송
 
@@ -119,21 +121,16 @@ jobs:
                   mkdir -p /home/ubuntu/rest-api
                   cd /home/ubuntu/rest-api
                   
-                  # PM2를 이용하여 Java API를 prod 프로필로 실행 및 무중단 재시작
-                  (REDIS_HOST="${{ secrets.REDIS_HOST }}" \
-                    REDIS_PORT="${{ secrets.REDIS_PORT }}" \
-                    REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
-                    KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
-                    KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
-                    KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
-                    pm2 reload "rest-api" --update-env \
-                    || REDIS_HOST="${{ secrets.REDIS_HOST }}" \
-                    REDIS_PORT="${{ secrets.REDIS_PORT }}" \
-                    REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
-                    KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
-                    KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
-                    KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
-                    pm2 start "java -jar -Dspring.profiles.active=prod restApi.jar" --name "rest-api") && pm2 save
+                  chmod +x /home/ubuntu/rest-api/deploy.sh
+                  
+                  # 무중단 포트 스위칭 배포 스크립트 실행 (환경변수 주입)
+                  REDIS_HOST="${{ secrets.REDIS_HOST }}" \
+                  REDIS_PORT="${{ secrets.REDIS_PORT }}" \
+                  REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
+                  KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+                  KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
+                  KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
+                  /home/ubuntu/rest-api/deploy.sh
             
     #변경사항 없으면 서버만 재시작    
     restart:
