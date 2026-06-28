@@ -13,6 +13,7 @@ import com.app.kakao.dto.KakaoSendReqDTO;
 import com.app.kakao.dto.KakaoTokenResDTO;
 import com.app.kakao.service.KakaoService;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/kakao")
+@Hidden
 public class KakaoController {
 
     private final KakaoService kakaoService;

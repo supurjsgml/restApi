@@ -13,36 +13,18 @@ import com.app.common.dto.ApiDocumentResponseDTO.Error;
 import com.app.common.dto.ApiDocumentResponseDTO.Error.HeaderError;
 import com.app.common.dto.res.ApiDataResponse;
 import com.app.common.exception.ApiDataResponseSuccessException;
+import com.app.kakao.service.KakaoService;
 
-import lombok.extern.slf4j.Slf4j;;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class RestExceptionHandler {
-//  @ExceptionHandler({NoHandlerFoundException.class})
-//  @ResponseStatus(HttpStatus.NOT_FOUND)
-//  public Error<Object> handleNoHandlerFound(NoHandlerFoundException e, WebRequest request) {
-//    return new Error<Object>();
-//  }
-  
-//  @ExceptionHandler({PermissionDeniedException.class})
-//  @ResponseStatus(HttpStatus.FORBIDDEN)
-//  public Error<Object> handlePermissionDenied(PermissionDeniedException e, WebRequest request) {
-//    return new Error<Object>();
-//  }
-  
-//  @ExceptionHandler({AccessDeniedException.class})
-//  @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//  public Error<Object> handleUnauthorized(AccessDeniedException e, WebRequest request) {
-//    return new Error<Object>();
-//  }
-  
-//  @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
-//  @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-//  public Error<Object> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e, WebRequest request) {
-//    return new Error<Object>();
-//  }
-  
+
+  private final KakaoService kakaoService;
+
   @ExceptionHandler({MethodArgumentNotValidException.class})
   public Error<Object> handleMethodNotInvaild(MethodArgumentNotValidException e, WebRequest request) {
       String error = null;
@@ -68,10 +50,20 @@ public class RestExceptionHandler {
       return new ApiDataResponse<Object>().ok(e.getData(), e.getCode(), e.getMessage());
   }
   
-//  @ExceptionHandler({Exception.class})
-//  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//  public Error<Object> handleException(Exception e, WebRequest request) {
-//    e.printStackTrace();
-//    return new Error<Object>();
-//  }
+  @ExceptionHandler({Exception.class})
+  public Error<Object> handleException(Exception e, WebRequest request) {
+      log.error("Server Exception ERROR : {}", e.getMessage(), e);
+      
+      // 서버 에러 알림 전송
+      try {
+          String errorMsg = "[restApi 서버 에러] " + e.getClass().getSimpleName() + " : " + e.getMessage();
+          kakaoService.sendKakao(errorMsg.length() > 180 ? errorMsg.substring(0, 180) : errorMsg);
+      } catch (Exception ex) {
+          log.error("에러 알림톡 전송 중 오류 발생: {}", ex.getMessage());
+      }
+
+      Error<Object> er = new Error<>();
+      er.setHeader(HeaderError.builder().message("서버 에러가 발생하였습니다. 관리자에게 문의해 주세요.").build());
+      return er;
+  }
 }

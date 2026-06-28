@@ -43,6 +43,7 @@ key:
   kakao:
     clientId: 뭐게요
     clientSecret: 뭘까
+    refreshToken: 궁굼하지롱
 
 server:
   port: ${port:8080}
@@ -132,6 +133,7 @@ key:
   kakao:
     clientId: "${KAKAO_CLIENT_ID}"
     clientSecret: "${KAKAO_CLIENT_SECRET}"
+    refreshToken: "${KAKAO_REFRESH_TOKEN}"
 
 rest-api:
   batch:
@@ -160,6 +162,7 @@ key:
   kakao:
     clientId: "${KAKAO_CLIENT_ID}"
     clientSecret: "${KAKAO_CLIENT_SECRET}"
+    refreshToken: "${KAKAO_REFRESH_TOKEN}"
 
 rest-api:
   batch:

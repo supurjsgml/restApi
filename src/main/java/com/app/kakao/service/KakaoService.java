@@ -7,6 +7,11 @@ import reactor.core.publisher.Mono;
 public interface KakaoService {
 
     /**
+     * 카카오 메시지 전송 (자체 토큰 사용)
+     */
+    void sendKakao(String msg);
+
+    /**
      * [Scheduler-Job 전용]
      * Scheduler-Job이 보내온 refreshToken으로 카카오 토큰 갱신
      */
