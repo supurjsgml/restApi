@@ -12,6 +12,7 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "rest-api")
 public class RestApiProperties {
 
+    private String baseUrl;
     private Batch batch;
     private Kakao kakao;
 

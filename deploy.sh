@@ -47,11 +47,11 @@ echo ">> 타겟 포트($TARGET_PORT)로 신규 JAR 기동 시작..."
 # deploy.yml 등에서 넘겨받은 기존 환경변수들을 그대로 사용하여 백그라운드 구동
 nohup java -jar -Dserver.port=$TARGET_PORT -Dspring.profiles.active=prod /home/ubuntu/rest-api/restApi.jar > /home/ubuntu/rest-api/nohup.out 2>&1 &
 
-# 4. 새 서버 헬스체크 (정상 구동될 때까지 최대 30초 대기)
+# 4. 새 서버 헬스체크 (정상 구동될 때까지 최대 60초 대기)
 echo ">> 신규 서버 헬스체크 시작 (http://localhost:$TARGET_PORT)..."
 HEALTH_SUCCESS=false
 
-for i in {1..30}; do
+for i in {1..60}; do
     # 헬스체크 응답 코드 확인
     STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$TARGET_PORT/api/getUrl || true)
     
@@ -61,12 +61,12 @@ for i in {1..30}; do
         break
     fi
     
-    echo ">> 헬스체크 대기 중... (${i}/30)"
+    echo ">> 헬스체크 대기 중... (${i}/60)"
     sleep 1
 done
 
 if [ "$HEALTH_SUCCESS" = false ]; then
-    echo ">> [ERROR] 신규 서버 기동 실패 (30초 초과). 배포를 중단합니다."
+    echo ">> [ERROR] 신규 서버 기동 실패 (60초 초과). 배포를 중단합니다."
     exit 1
 fi
 

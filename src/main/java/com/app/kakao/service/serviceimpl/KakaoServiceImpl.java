@@ -99,7 +99,7 @@ public class KakaoServiceImpl implements KakaoService {
             try {
                 // 카톡text 템플릿 생성
                 KakaoTextTemplate template = KakaoTextTemplate.restartTemplate(msg,
-                        restApiProperties.getBatch().getBaseUrl(),
+                        restApiProperties.getBaseUrl(),
                         "/api/lightsail/restart-api");
 
                 // 제이슨 ~ 직여을화
@@ -158,7 +158,7 @@ public class KakaoServiceImpl implements KakaoService {
                     String newRefreshToken = tokenResult.getNewRefreshToken();
 
                     KakaoTextTemplate template = KakaoTextTemplate.restartTemplate(msg,
-                            restApiProperties.getBatch().getBaseUrl());
+                            restApiProperties.getBaseUrl());
 
                     String templateJson;
                     try {
