@@ -161,7 +161,7 @@ public class KakaoServiceImpl implements KakaoService {
                             restApiProperties.getBatch().getBaseUrl());
 
                     String templateJson;
-                    try { 
+                    try {
                         templateJson = objectMapper.writeValueAsString(template);
                     } catch (JsonProcessingException e) {
                         return Mono.error(e);
