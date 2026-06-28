@@ -123,7 +123,9 @@ jobs:
                   
                   chmod +x /home/ubuntu/rest-api/deploy.sh
                   
-                  # 무중단 포트 스위칭 배포 스크립트 실행 (환경변수 주입)
+                  # 무중단 포트 스위칭 배포 스크립트 실행 (포트 정보 및 환경변수 주입)
+                  PORT_A="8080" \
+                  PORT_B="9080" \
                   REDIS_HOST="${{ secrets.REDIS_HOST }}" \
                   REDIS_PORT="${{ secrets.REDIS_PORT }}" \
                   REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
