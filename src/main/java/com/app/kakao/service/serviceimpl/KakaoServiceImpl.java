@@ -139,6 +139,7 @@ public class KakaoServiceImpl implements KakaoService {
                 null,
                 Map.class
         ).map(response -> {
+            log.info("Token : {}",response);
             String newRefreshToken = (String) response.get("refresh_token");
             boolean hasNew = newRefreshToken != null && !newRefreshToken.trim().isEmpty()
                     && !newRefreshToken.equals(externalRefreshToken);
