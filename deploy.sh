@@ -34,7 +34,7 @@ fi
 echo ">> 현재 구동 중인 포트: $CURRENT_PORT"
 echo ">> 새로 배포할 타겟 포트: $TARGET_PORT"
 
-# 2. 타겟 포트에 기존 프로세스가 돌고 있다면 강제 종료 (포트 점유 방지)
+# 타겟 포트에 기존 프로세스가 돌고 있다면 강제 종료 (포트 점유 방지)
 TARGET_PID=$(lsof -t -i :$TARGET_PORT)
 if [ ! -z "$TARGET_PID" ]; then
     echo ">> 타겟 포트($TARGET_PORT)에 이미 실행 중인 기존 프로세스($TARGET_PID) 종료"
@@ -42,12 +42,12 @@ if [ ! -z "$TARGET_PID" ]; then
     sleep 2
 fi
 
-# 3. 타겟 포트로 새 JAR 파일 구동
+# 타겟 포트로 새 JAR 파일 구동
 echo ">> 타겟 포트($TARGET_PORT)로 신규 JAR 기동 시작..."
 # deploy.yml 등에서 넘겨받은 기존 환경변수들을 그대로 사용하여 백그라운드 구동
 nohup java -jar -Dserver.port=$TARGET_PORT -Dspring.profiles.active=prod /home/ubuntu/rest-api/restApi.jar > /home/ubuntu/rest-api/nohup_$TARGET_PORT.out 2>&1 &
 
-# 4. 새 서버 헬스체크 (정상 구동될 때까지 최대 60초 대기)
+# 새 서버 헬스체크 (정상 구동될 때까지 최대 60초 대기)
 echo ">> 신규 서버 헬스체크 시작 (http://localhost:$TARGET_PORT)..."
 HEALTH_SUCCESS=false
 
@@ -70,7 +70,7 @@ if [ "$HEALTH_SUCCESS" = false ]; then
     exit 1
 fi
 
-# 5. Nginx 설정 스위칭 (PORT_A -> PORT_B 또는 PORT_B -> PORT_A)
+# Nginx 설정 스위칭 (PORT_A -> PORT_B 또는 PORT_B -> PORT_A)
 echo ">> Nginx 라우팅 포트 스위칭 ($CURRENT_PORT -> $TARGET_PORT)"
 
 # Nginx 설정 파일에서 기존 포트를 타겟 포트로 일괄 치환
@@ -82,7 +82,7 @@ sudo systemctl reload nginx
 echo ">> Nginx 설정 리로드 완료. 라우팅 전환 유예를 위해 15초간 대기합니다..."
 sleep 15
 
-# 6. 이전 버전 포트 프로세스 안전하게 종료
+# 이전 버전 포트 프로세스 안전하게 종료
 echo ">> 이전 버전 프로세스($CURRENT_PORT) 순차 종료 중..."
 CURRENT_PID=$(lsof -t -i :$CURRENT_PORT)
 if [ ! -z "$CURRENT_PID" ]; then
@@ -101,5 +101,4 @@ fi
 
 echo "========================================="
 echo " [Nginx Port-Switching Deploy] Success!"
-echo " >> 현재 구동 로그 확인: tail -f /home/ubuntu/rest-api/nohup_$TARGET_PORT.out"
 echo "========================================="
