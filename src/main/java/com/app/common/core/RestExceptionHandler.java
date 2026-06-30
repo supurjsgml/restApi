@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.app.common.dto.ApiDocumentResponseDTO.Error;
 import com.app.common.dto.ApiDocumentResponseDTO.Error.HeaderError;
@@ -48,6 +49,14 @@ public class RestExceptionHandler {
       log.warn("RollbackSuccessException - Code : {}, Msg : {} Data : {}", e.getCode(), e.getMessage(), e.getData());
 
       return new ApiDataResponse<Object>().ok(e.getData(), e.getCode(), e.getMessage());
+  }
+  
+  @ExceptionHandler(NoResourceFoundException.class)
+  public Error<Object> handleNoResourceFoundException(NoResourceFoundException e) {
+      log.warn("Resource Not Found (404) : {}", e.getMessage());
+      Error<Object> er = new Error<>();
+      er.setHeader(HeaderError.builder().message("존재하지 않는 리소스입니다.").build());
+      return er;
   }
   
   @ExceptionHandler({Exception.class})
