@@ -15,6 +15,7 @@ public class RestApiProperties {
     private String baseUrl;
     private Batch batch;
     private Kakao kakao;
+    private Gemini gemini;
 
     @Getter
     @Setter
@@ -42,5 +43,12 @@ public class RestApiProperties {
             private String baseUrl;
             private String token;
         }
+    }
+
+    @Getter
+    @Setter
+    public static class Gemini {
+        private String baseUrl;
+        private String generateContent;
     }
 }

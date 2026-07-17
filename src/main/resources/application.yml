@@ -44,6 +44,8 @@ key:
     clientId: 뭐게요
     clientSecret: 뭘까
     refreshToken: 궁굼하지롱
+  gemini:
+    apiKey: ${GEMINI_API_KEY:끄으으으윽}
 
 server:
   port: ${port:8080}
@@ -118,6 +120,9 @@ rest-api:
     auth:
       baseUrl: https://kauth.kakao.com
       token: ${rest-api.kakao.auth.baseUrl}/oauth/token
+  gemini:
+    baseUrl: https://generativelanguage.googleapis.com/v1beta/models
+    generateContent: "${rest-api.gemini.baseUrl}/{model}:generateContent"
 
 
 ---
@@ -136,6 +141,8 @@ key:
     clientId: "${KAKAO_CLIENT_ID}"
     clientSecret: "${KAKAO_CLIENT_SECRET}"
     refreshToken: "${KAKAO_REFRESH_TOKEN}"
+  gemini:
+    apiKey: "${GEMINI_API_KEY}"
 
 rest-api:
   baseUrl: https://guney.kro.kr
@@ -149,6 +156,9 @@ rest-api:
     auth:
       baseUrl: https://kauth.kakao.com
       token: ${rest-api.kakao.auth.baseUrl}/oauth/token
+  gemini:
+    baseUrl: https://generativelanguage.googleapis.com/v1beta/models
+    generateContent: "${rest-api.gemini.baseUrl}/{model}:generateContent"
 
 ---
 
@@ -166,6 +176,8 @@ key:
     clientId: "${KAKAO_CLIENT_ID}"
     clientSecret: "${KAKAO_CLIENT_SECRET}"
     refreshToken: "${KAKAO_REFRESH_TOKEN}"
+  gemini:
+    apiKey: "${GEMINI_API_KEY}"
 
 rest-api:
   baseUrl: https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e
@@ -179,3 +191,10 @@ rest-api:
     auth:
       baseUrl: https://kauth.kakao.com
       token: ${rest-api.kakao.auth.baseUrl}/oauth/token
+  gemini:
+    baseUrl: https://generativelanguage.googleapis.com/v1beta/models
+    generateContent: "${rest-api.gemini.baseUrl}/{model}:generateContent"
+
+app:
+  admin-emails: ${APP_ADMIN_EMAILS:}
+  daily-limit: ${APP_DAILY_LIMIT:50}
