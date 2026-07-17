@@ -145,6 +145,8 @@ jobs:
                   KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
                   KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
                   KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
+                  GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+                  APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
                   /home/ubuntu/rest-api/deploy.sh
             
     #변경사항 없으면 서버만 재시작    
@@ -177,4 +179,6 @@ jobs:
                   KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
                   KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
                   KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
+                  GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+                  APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
                   /home/ubuntu/rest-api/deploy.sh
