@@ -1,6 +1,8 @@
 package com.app.gemini.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +26,7 @@ import com.app.gemini.service.RateLimitService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +41,10 @@ public class GeminiController {
     private final RateLimitService rateLimitService;
     private final WebClient webClient;
 
+    // 인증 토큰 로컬 캐시 맵 및 만료시간(10분) 정의
+    private final Map<String, CachedToken> tokenCache = new ConcurrentHashMap<>();
+    private static final long CACHE_DURATION = 10 * 60 * 1000L;
+
     // 구글 Oauth 토큰 반환 결과 수신 DTO
     @lombok.Data
     @lombok.NoArgsConstructor
@@ -46,6 +53,18 @@ public class GeminiController {
         private String sub;
         private String email;
         private String error;
+    }
+
+    // 캐싱 토큰 정보를 담기 위한 래퍼 DTO
+    @Getter
+    @RequiredArgsConstructor
+    private static class CachedToken {
+        private final GoogleTokenInfo tokenInfo;
+        private final long createdAt = System.currentTimeMillis();
+
+        public boolean isExpired(long durationMs) {
+            return System.currentTimeMillis() - this.createdAt > durationMs;
+        }
     }
 
     @ApiDocumentResponse
@@ -62,13 +81,26 @@ public class GeminiController {
             }
             String token = authHeader.substring(7);
 
-            // 구글 토큰 검증 서버 통신
-            GoogleTokenInfo tokenInfo = webClient.get()
-                    .uri("https://oauth2.googleapis.com/tokeninfo?access_token=" + token)
-                    .retrieve()
-                    .bodyToMono(GoogleTokenInfo.class)
-                    .onErrorReturn(new GoogleTokenInfo())
-                    .block();
+            // 캐시에서 토큰 조회 후 없거나 만료된 경우 구글 서버에서 재검증
+            CachedToken cached = tokenCache.get(token);
+            if (cached == null || cached.isExpired(CACHE_DURATION)) {
+                GoogleTokenInfo tokenInfo = webClient.get()
+                        .uri("https://oauth2.googleapis.com/tokeninfo?access_token=" + token)
+                        .retrieve()
+                        .bodyToMono(GoogleTokenInfo.class)
+                        .onErrorReturn(new GoogleTokenInfo())
+                        .block();
+
+                if (tokenInfo != null && tokenInfo.getError() == null && 
+                    (tokenInfo.getUser_id() != null || tokenInfo.getSub() != null || tokenInfo.getEmail() != null)) {
+                    cached = new CachedToken(tokenInfo);
+                    tokenCache.put(token, cached);
+                } else {
+                    cached = new CachedToken(tokenInfo != null ? tokenInfo : new GoogleTokenInfo());
+                }
+            }
+
+            GoogleTokenInfo tokenInfo = cached.getTokenInfo();
 
             if (tokenInfo == null || tokenInfo.getError() != null || 
                 (tokenInfo.getUser_id() == null && tokenInfo.getSub() == null && tokenInfo.getEmail() == null)) {
