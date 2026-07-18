@@ -21,10 +21,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityConfig {
 	
 	//허용 도메인 목록
-	private final List<String> ALLOWED = List.of("https://vue-front-807ffc6b572e.herokuapp.com"
-											   , "https://guney.kro.kr"
+	private final List<String> ALLOWED = List.of("https://guney.kro.kr"
 											   , "https://xn--v69a93jfng.xn--yq5b.xn--3e0b707e"
-											   , "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e"
                                                , "chrome-extension://ilaafkabnbkdgaieedckdnfkmapocimc"
                                                , "chrome-extension://chjbcemdkiommdpeklplkbfpemefejcp"
                                                , "chrome-extension://mpjpldgmkgbiojecpmhpdkoebeamemdh"  //로컬
