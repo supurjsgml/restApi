@@ -3,6 +3,7 @@ package com.app.gemini.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,15 +70,14 @@ public class GeminiController {
 
     @ApiDocumentResponse
     @Operation(summary = "텍스트 요약 및 분석", description = "제미나이 API를 사용해 웹페이지 본문을 분석하고 가공합니다.", hidden = true)
-    @PostMapping(value = "/summarize", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiBodyDTO.Response<GeminiResDTO> summarize(
+    @PostMapping(value = "/summarize", produces = MediaType.TEXT_PLAIN_VALUE)
+    public Flux<String> summarize(
             @RequestBody GeminiReqDTO reqDTO,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         
-        ApiBodyDTO.Response<GeminiResDTO> response = null;
         try {
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ApiResUtil.failed("인증 토큰이 누락되었습니다. 구글 로그인이 필요합니다.");
+                return Flux.just("ERROR: 인증 토큰이 누락되었습니다. 구글 로그인이 필요합니다.");
             }
             String token = authHeader.substring(7);
 
@@ -104,7 +104,7 @@ public class GeminiController {
 
             if (tokenInfo == null || tokenInfo.getError() != null || 
                 (tokenInfo.getUser_id() == null && tokenInfo.getSub() == null && tokenInfo.getEmail() == null)) {
-                return ApiResUtil.failed("유효하지 않은 구글 인증 토큰입니다. 다시 로그인해 주세요.");
+                return Flux.just("ERROR: 유효하지 않은 구글 인증 토큰입니다. 다시 로그인해 주세요.");
             }
 
             String email = tokenInfo.getEmail();
@@ -113,19 +113,14 @@ public class GeminiController {
             // 일일 한도 체크 (50회)
             Boolean isAllowed = rateLimitService.checkLimit(email, googleSubId).block();
             if (Boolean.FALSE.equals(isAllowed)) {
-                return ApiResUtil.failed("일일 요약 제한 횟수(50회)를 초과했습니다. 내일 다시 이용해 주세요.");
+                return Flux.just("ERROR: 일일 요약 제한 횟수(50회)를 초과했습니다. 내일 다시 이용해 주세요.");
             }
 
-            String resultText = geminiService.getSummary(reqDTO).block();
-            GeminiResDTO data = GeminiResDTO.builder()
-                    .result(resultText)
-                    .build();
-            response = ApiResUtil.success(data, MessageEnum.SUCCESS.getCode());
+            return geminiService.getSummary(reqDTO);
         } catch (Exception e) {
             log.error("GeminiController Exception ERROR : {}", e.getMessage(), e);
-            response = ApiResUtil.failed(MessagesUtils.getMessage(MessageEnum.INTERNAL_SERVER_ERROR.getCode()));
+            return Flux.just("ERROR: " + MessagesUtils.getMessage(MessageEnum.INTERNAL_SERVER_ERROR.getCode()));
         }
-        return response;
     }
 
     @ApiDocumentResponse

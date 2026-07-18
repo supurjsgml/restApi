@@ -17,6 +17,7 @@ import com.app.gemini.service.GeminiService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -31,13 +32,16 @@ public class GeminiServiceImpl implements GeminiService {
     private String apiKey;
 
     @Override
-    public Mono<String> getSummary(GeminiReqDTO reqDTO) {
+    public Flux<String> getSummary(GeminiReqDTO reqDTO) {
         String model = reqDTO.getModel();
         if (model == null || model.trim().isEmpty()) {
             model = "gemini-1.5-flash";
         }
 
-        String url = restApiProperties.getGemini().getGenerateContent().replace("{model}", model) + "?key=" + apiKey;
+        // generateContent 대신 streamGenerateContent를 호출하도록 치환
+        String url = restApiProperties.getGemini().getGenerateContent()
+                .replace("{model}", model)
+                .replace("generateContent", "streamGenerateContent") + "?key=" + apiKey;
 
         String combinedPrompt = reqDTO.getPrompt() + "\n\n[웹페이지 본문 내용]\n" + reqDTO.getText();
 
@@ -57,7 +61,7 @@ public class GeminiServiceImpl implements GeminiService {
                 .uri(url)
                 .bodyValue(requestPayload)
                 .retrieve()
-                .bodyToMono(GeminiApiResponse.class)
+                .bodyToFlux(GeminiApiResponse.class)
                 .map(response -> {
                     if (response != null && response.getCandidates() != null && !response.getCandidates().isEmpty()) {
                         GeminiApiResponse.Candidate candidate = response.getCandidates().get(0);
@@ -65,11 +69,11 @@ public class GeminiServiceImpl implements GeminiService {
                             return candidate.getContent().getParts().get(0).getText();
                         }
                     }
-                    return "AI 응답을 생성하지 못했습니다.";
+                    return "";
                 })
                 .onErrorResume(e -> {
-                    log.error("Gemini API 호출 중 오류 발생: {}", e.getMessage(), e);
-                    return Mono.just("AI 서비스와의 통신 중 오류가 발생했습니다: " + e.getMessage());
+                    log.error("Gemini API 스트리밍 호출 중 오류 발생: {}", e.getMessage(), e);
+                    return Flux.just("ERROR: AI 서비스와의 통신 중 오류가 발생했습니다: " + e.getMessage());
                 });
     }
 
