@@ -1,5 +1,8 @@
 package com.app.config;
 
+import java.time.Duration;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,15 +20,36 @@ import com.app.common.util.MessagesUtils;
 //@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {
 
-	private final ThreadPoolTaskExecutor applicationTaskExecutor;
+	@Value("${spring.task.execution.pool.core-size:8}")
+	private int coreSize;
 
-	public WebMvcConfig(ThreadPoolTaskExecutor applicationTaskExecutor) {
-		this.applicationTaskExecutor = applicationTaskExecutor;
+	@Value("${spring.task.execution.pool.max-size:50}")
+	private int maxSize;
+
+	@Value("${spring.task.execution.pool.queue-capacity:100}")
+	private int queueCapacity;
+
+	@Value("${spring.task.execution.pool.keep-alive:60s}")
+	private Duration keepAlive;
+
+	@Value("${spring.task.execution.thread-name-prefix:mvc-async-}")
+	private String threadNamePrefix;
+
+	@Bean
+	public ThreadPoolTaskExecutor mvcTaskExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(coreSize);
+		executor.setMaxPoolSize(maxSize);
+		executor.setQueueCapacity(queueCapacity);
+		executor.setKeepAliveSeconds((int) keepAlive.getSeconds());
+		executor.setThreadNamePrefix(threadNamePrefix);
+		executor.initialize();
+		return executor;
 	}
 
 	@Override
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-		configurer.setTaskExecutor(applicationTaskExecutor);
+		configurer.setTaskExecutor(mvcTaskExecutor());
 	}
 
 	@Override
