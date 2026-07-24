@@ -33,7 +33,7 @@ public class RateLimitServiceImpl implements RateLimitService {
     public Mono<Boolean> checkLimit(String email, String googleSubId) {
         // 관리자 검사 (이메일 기준)
         if (email != null && adminEmails != null && adminEmails.contains(email)) {
-            log.info("관리자 요청 허가: {}", email);
+            log.info("관리자 요청 허가");
             return Mono.just(true);
         }
 
