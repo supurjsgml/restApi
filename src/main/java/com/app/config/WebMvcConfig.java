@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -14,6 +16,17 @@ import com.app.common.util.MessagesUtils;
 @Configuration
 //@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {
+
+	private final ThreadPoolTaskExecutor applicationTaskExecutor;
+
+	public WebMvcConfig(ThreadPoolTaskExecutor applicationTaskExecutor) {
+		this.applicationTaskExecutor = applicationTaskExecutor;
+	}
+
+	@Override
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+		configurer.setTaskExecutor(applicationTaskExecutor);
+	}
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
