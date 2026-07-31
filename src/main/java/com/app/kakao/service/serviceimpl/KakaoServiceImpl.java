@@ -1,5 +1,7 @@
 package com.app.kakao.service.serviceimpl;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -41,14 +43,19 @@ public class KakaoServiceImpl implements KakaoService {
     @Value("${key.kakao.refreshToken}")
     private String refreshToken;
 
+    @Value("${key.kakao.token-file-path:kakao-token.txt}")
+    private String tokenFilePath;
+
     private String loadRefreshToken() {
         try {
-            java.io.File file = new java.io.File("kakao-token.txt");
-            if (file.exists()) {
-                String fileToken = java.nio.file.Files.readString(file.toPath()).trim();
-                if (!fileToken.isEmpty()) {
-                    log.info("리프레시 토큰을 로드.");
-                    return fileToken;
+            if (tokenFilePath != null && !tokenFilePath.trim().isEmpty()) {
+                File file = new File(tokenFilePath.trim());
+                if (file.exists()) {
+                    String fileToken = Files.readString(file.toPath()).trim();
+                    if (!fileToken.isEmpty()) {
+                        log.info("리프레시 토큰을 로드: {}", file.getAbsolutePath());
+                        return fileToken;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -60,9 +67,15 @@ public class KakaoServiceImpl implements KakaoService {
 
     private void saveRefreshToken(String newToken) {
         try {
-            java.io.File file = new java.io.File("kakao-token.txt");
-            java.nio.file.Files.writeString(file.toPath(), newToken.trim());
-            log.info("리프레시 토큰 저장");
+            if (tokenFilePath != null && !tokenFilePath.trim().isEmpty()) {
+                File file = new File(tokenFilePath.trim());
+                File parentDir = file.getParentFile();
+                if (parentDir != null && !parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
+                Files.writeString(file.toPath(), newToken.trim());
+                log.info("리프레시 토큰 저장: {}", file.getAbsolutePath());
+            }
         } catch (Exception e) {
             log.error("리프레시 토큰 저장중 오류 발생: {}", e.getMessage());
         }
