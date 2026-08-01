@@ -147,6 +147,7 @@ jobs:
                   KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
                   GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
                   APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
+                  GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}" \
                   /home/ubuntu/rest-api/deploy.sh
             
     #변경사항 없으면 서버만 재시작    
@@ -181,4 +182,5 @@ jobs:
                   KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
                   GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
                   APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
+                  GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}" \
                   /home/ubuntu/rest-api/deploy.sh

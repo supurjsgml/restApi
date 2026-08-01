@@ -48,6 +48,11 @@ dependencies {
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	
+    // 메트릭 수집 및 Grafana 전송 관련 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.micrometer:micrometer-registry-otlp'
+	
 	compileOnly 'org.projectlombok:lombok'
 	
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

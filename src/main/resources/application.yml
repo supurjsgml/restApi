@@ -46,7 +46,13 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
-  
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
 key:
   kakao:
     clientId: 뭐게요
@@ -209,3 +215,22 @@ rest-api:
 app:
   admin-emails: ${APP_ADMIN_EMAILS:}
   daily-limit: ${APP_DAILY_LIMIT:50}
+
+management:
+  otlp:  
+    metrics:  
+      export: 
+        enabled: true 
+        url: https://otlp-gateway-prod-ap-northeast-0.grafana.net/otlp/v1/metrics
+        headers:  
+          Authorization: "Basic ${GRAFANA_TOKEN}"
+        step: 1m
+        batch-size: 512
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info, threaddump, threads
+  prometheus:
+    metrics:
+      export:
+        enabled: true
