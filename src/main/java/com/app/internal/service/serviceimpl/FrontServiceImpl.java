@@ -46,6 +46,8 @@ public class FrontServiceImpl implements FrontService {
     public PageVisitsDTO getPageVisits() {
         int main = 0;
         int camel = 0;
+        int translate = 0;
+        int diff = 0;
         int grafana = 0;
         int google = 0;
         int statsVal = 0;
@@ -54,6 +56,8 @@ public class FrontServiceImpl implements FrontService {
             Map<Object, Object> entries = redisTemplate.opsForHash().entries(PAGE_VISITS_KEY);
             main = parseCount(entries.get("Main"));
             camel = parseCount(entries.get("Camel"));
+            translate = parseCount(entries.get("Translate"));
+            diff = parseCount(entries.get("Diff"));
             grafana = parseCount(entries.get("Grafana"));
             google = parseCount(entries.get("Google"));
             statsVal = parseCount(entries.get("Stats"));
@@ -64,6 +68,8 @@ public class FrontServiceImpl implements FrontService {
         return PageVisitsDTO.builder()
                 .main(main)
                 .camel(camel)
+                .translate(translate)
+                .diff(diff)
                 .grafana(grafana)
                 .google(google)
                 .stats(statsVal)
@@ -83,64 +89,64 @@ public class FrontServiceImpl implements FrontService {
     public DashboardStatsDTO getDashboardStats() {
         List<String> days = new ArrayList<>();
         List<Integer> values = new ArrayList<>();
-        int total = 0;
 
         LocalDate today = LocalDate.now();
         DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd");
 
-        // 최근 7일치 키 목록 생성
+        // 최근 14일치 키 목록 생성
         List<String> keys = new ArrayList<>();
-        for (int i = 6; i >= 0; i--) {
+        for (int i = 13; i >= 0; i--) {
             keys.add(DAILY_KEY_PREFIX + today.minusDays(i).format(keyFormatter));
         }
 
         List<String> rawValues = null;
         try {
-            // Redis multiGet으로 7일치 데이터를 한 번의 네트워크 요청으로 한꺼번에 조회
             rawValues = redisTemplate.opsForValue().multiGet(keys);
         } catch (Exception e) {
             log.error("Redis 방문자 데이터 멀티조회 중 오류 발생: {}", e.getMessage());
         }
 
-        for (int i = 0; i < 7; i++) {
-            LocalDate date = today.minusDays(6 - i);
-            
-            // UI 표시용 날짜 설정
-            if (6 - i == 0) {
-                days.add("오늘");
-            } else {
-                days.add(date.format(displayFormatter));
-            }
+        int prevWeekTotal = 0;
+        int thisWeekTotal = 0;
 
+        for (int i = 0; i < 14; i++) {
+            LocalDate date = today.minusDays(13 - i);
             int count = 0;
             if (rawValues != null && rawValues.get(i) != null) {
                 try {
                     count = Integer.parseInt(rawValues.get(i));
                 } catch (NumberFormatException ignored) {}
             }
-            values.add(count);
-            total += count;
+
+            if (i < 7) {
+                prevWeekTotal += count;
+            } else {
+                thisWeekTotal += count;
+                values.add(count);
+                if (13 - i == 0) {
+                    days.add("오늘");
+                } else {
+                    days.add(date.format(displayFormatter));
+                }
+            }
         }
 
-        // 트렌드 계산 (어제 대비 오늘 방문자 증감 비율)
-        int todayCount = values.get(values.size() - 1);
-        int yesterdayCount = values.get(values.size() - 2);
+        // 트렌드 계산 (지난주 7일 합계 대비 이번주 7일 합계 증감 비율, 소수점 제거)
         String trend = "0%";
         String trendDirection = "up";
-        if (yesterdayCount > 0) {
-            double percent = ((double)(todayCount - yesterdayCount) / yesterdayCount) * 100;
-            trend = String.format("%.1f%%", Math.abs(percent));
+        if (prevWeekTotal > 0) {
+            double percent = ((double)(thisWeekTotal - prevWeekTotal) / prevWeekTotal) * 100;
+            trend = String.format("%d%%", Math.round(Math.abs(percent)));
             trendDirection = percent >= 0 ? "up" : "down";
-        } else if (todayCount > 0) {
+        } else if (thisWeekTotal > 0) {
             trend = "100%";
             trendDirection = "up";
         }
 
         return DashboardStatsDTO.builder()
                 .label("주간 방문자 (1주)")
-                .value(String.format("%,d", total))
-//                .description("실시간 업스태시 서버리스 Redis 연동 중")
+                .value(String.format("%,d", thisWeekTotal))
                 .trend(trend)
                 .trendDirection(trendDirection)
                 .sparklineValues(values)

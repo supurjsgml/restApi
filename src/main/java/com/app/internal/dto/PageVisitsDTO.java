@@ -22,6 +22,14 @@ public class PageVisitsDTO {
     @Schema(description = "Camel 페이지 방문수", example = "50")
     private int camel;
 
+    @JsonProperty("Translate")
+    @Schema(description = "Translate 페이지 방문수", example = "30")
+    private int translate;
+
+    @JsonProperty("Diff")
+    @Schema(description = "Diff 페이지 방문수", example = "40")
+    private int diff;
+
     @JsonProperty("Grafana")
     @Schema(description = "Grafana 페이지 방문수", example = "80")
     private int grafana;
