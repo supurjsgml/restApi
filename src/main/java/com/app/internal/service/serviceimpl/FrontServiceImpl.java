@@ -27,7 +27,7 @@ public class FrontServiceImpl implements FrontService {
             // 1. 페이지별 누적 방문수 증가 (항상 실행)
             if (pageName != null && !pageName.trim().isEmpty()) {
                 redisTemplate.opsForHash().increment(PAGE_VISITS_KEY, pageName, 1L);
-                log.info("페이지 뷰 증가: {} +1", pageName);
+                log.info("페이지 뷰 증가 : {}", pageName);
             }
 
             // 2. 신규 세션일 경우 일자별 전체 방문수 증가
@@ -48,9 +48,7 @@ public class FrontServiceImpl implements FrontService {
         int camel = 0;
         int translate = 0;
         int diff = 0;
-        int grafana = 0;
         int google = 0;
-        int statsVal = 0;
 
         try {
             Map<Object, Object> entries = redisTemplate.opsForHash().entries(PAGE_VISITS_KEY);
@@ -58,9 +56,7 @@ public class FrontServiceImpl implements FrontService {
             camel = parseCount(entries.get("Camel"));
             translate = parseCount(entries.get("Translate"));
             diff = parseCount(entries.get("Diff"));
-            grafana = parseCount(entries.get("Grafana"));
             google = parseCount(entries.get("Google"));
-            statsVal = parseCount(entries.get("Stats"));
         } catch (Exception e) {
             log.error("Redis 페이지 방문자 조회 중 오류 발생: {}", e.getMessage());
         }
@@ -70,9 +66,7 @@ public class FrontServiceImpl implements FrontService {
                 .camel(camel)
                 .translate(translate)
                 .diff(diff)
-                .grafana(grafana)
                 .google(google)
-                .stats(statsVal)
                 .build();
     }
 
