@@ -92,9 +92,9 @@ public class FrontServiceImpl implements FrontService {
         DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd");
 
-        // 최근 14일치 키 목록 생성
+        // 최근 7일치 키 목록 생성
         List<String> keys = new ArrayList<>();
-        for (int i = 13; i >= 0; i--) {
+        for (int i = 6; i >= 0; i--) {
             keys.add(DAILY_KEY_PREFIX + today.minusDays(i).format(keyFormatter));
         }
 
@@ -105,11 +105,11 @@ public class FrontServiceImpl implements FrontService {
             log.error("Redis 방문자 데이터 멀티조회 중 오류 발생: {}", e.getMessage());
         }
 
-        int prevWeekTotal = 0;
         int thisWeekTotal = 0;
+        int todayCount = 0;
 
-        for (int i = 0; i < 14; i++) {
-            LocalDate date = today.minusDays(13 - i);
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = today.minusDays(6 - i);
             int count = 0;
             if (rawValues != null && rawValues.get(i) != null) {
                 try {
@@ -117,30 +117,25 @@ public class FrontServiceImpl implements FrontService {
                 } catch (NumberFormatException ignored) {}
             }
 
-            if (i < 7) {
-                prevWeekTotal += count;
+            thisWeekTotal += count;
+            values.add(count);
+            if (6 - i == 0) {
+                days.add("오늘");
+                todayCount = count;
             } else {
-                thisWeekTotal += count;
-                values.add(count);
-                if (13 - i == 0) {
-                    days.add("오늘");
-                } else {
-                    days.add(date.format(displayFormatter));
-                }
+                days.add(date.format(displayFormatter));
             }
         }
 
-        // 트렌드 계산 (지난주 7일 합계 대비 이번주 7일 합계 증감 비율, 최대 100% 제한)
+        // 트렌드 계산 (최근 7일 일평균 방문자 수 대비 오늘 방문자 수 증감 비율)
         String trend = "0%";
         String trendDirection = "up";
-        if (prevWeekTotal > 0) {
-            double percent = ((double)(thisWeekTotal - prevWeekTotal) / prevWeekTotal) * 100;
-            long absPercent = Math.min(100L, Math.round(Math.abs(percent)));
+        if (thisWeekTotal > 0) {
+            double avg = (double) thisWeekTotal / 7.0;
+            double percent = ((todayCount - avg) / avg) * 100;
+            long absPercent = Math.round(Math.abs(percent));
             trend = String.format("%d%%", absPercent);
             trendDirection = percent >= 0 ? "up" : "down";
-        } else if (thisWeekTotal > 0) {
-            trend = "100%";
-            trendDirection = "up";
         }
 
         return DashboardStatsDTO.builder()
