@@ -25,7 +25,7 @@ public class SecurityConfig {
 											   , "https://xn--v69a93jfng.xn--yq5b.xn--3e0b707e"
                                                , "chrome-extension://ilaafkabnbkdgaieedckdnfkmapocimc"
                                                , "chrome-extension://chjbcemdkiommdpeklplkbfpemefejcp"
-                                               , "chrome-extension://dlcinfogijclefnmjjdecaboigdfdepm"  //로컬
+                                               , "chrome-extension://hecddnbbnkjpjajhmdoldmimmpjghaic"  //로컬
                                                , "chrome-extension://cigmfccgmaeohgblgnpfcheefkpockeo"  //우녕
 //                                               , "http://localhost"
                                                );
