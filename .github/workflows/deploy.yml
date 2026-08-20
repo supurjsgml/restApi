@@ -1,186 +1,178 @@
-name: master
+name: Deploy rest-api to Azure Container Apps
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
 
 jobs:
-    #소스 변동 사항이 있는지
-    check:
-        runs-on: ubuntu-latest
-        outputs:
-            changed: ${{ steps.changed-files.outputs.changed }}
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                fetch-depth: 0
-            - name: Check for changes
-              id: changed-files
-              env:
-                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  # 깃허브 API로 마지막으로 성공한 워크플로우 실행의 커밋 SHA 획득
-                  PREV_SHA=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-                    "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=completed&conclusion=success&per_page=1" \
-                    | jq -r '.workflow_runs[0].head_sha')
-                  
-                  if [ -z "$PREV_SHA" ] || [ "$PREV_SHA" = "null" ]; then
-                    echo ">> 이전 성공 빌드 이력이 없어 직전 커밋(HEAD^)과 비교합니다."
-                    PREV_SHA="HEAD^"
-                  else
-                    echo ">> 이전 성공 배포 커밋: $PREV_SHA"
-                  fi
-                  
-                  if git diff --quiet $PREV_SHA HEAD -- \
-                    src/main build.gradle deploy.sh .github/workflows/deploy.yml; then
-                    echo ">> 소스 코드 변동 없음 -> 단순 재시작"
-                    echo "changed=false" >> $GITHUB_OUTPUT
-                  else
-                    echo ">> 소스 코드 변동 감지 -> 신규 빌드 및 배포 진행"
-                    echo "changed=true" >> $GITHUB_OUTPUT
-                  fi
-              
-    build:
-        needs: check
-        if: needs.check.outputs.changed == 'true'
-        runs-on: ubuntu-latest
-        
-        steps:
-            #소스 코드 체크아웃
-            - name: Checkout code
-              uses: actions/checkout@v4
-        
-            #버전 셋팅
-            - name: Set up JDK 21
-              uses: actions/setup-java@v4
-              with:
-                java-version: '21'
-                distribution: 'temurin'
-                cache: gradle #Gradle 의존성 캐싱으로 빌드 속도 향상
-        
-            #Gradle 실행 권한 부여
-            - name: Grant execute permission for gradlew
-              run: chmod +x gradlew
-        
-            #프로젝트 빌드
-            - name: Build with Gradle
-              run: |
-                ./gradlew clean bootJar -x test
-                cp deploy.sh build/libs/
-            
-            #자르 생성
-            - name: Upload Build 좌르
-              uses: actions/upload-artifact@v4
-              with:
-                name: restApi-jar
-                path: build/libs/
-                retention-days: 1
-    
+  # 소스 코드 변경 사항 확인
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changed-files.outputs.changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes
+        id: changed-files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREV_SHA=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=completed&conclusion=success&per_page=1" \
+            | jq -r '.workflow_runs[0].head_sha')
           
-    deploy:
-        needs: [check, build]
-        if: needs.check.outputs.changed == 'true'
-        runs-on: ubuntu-latest
-        
-        environment: redoc
-        
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              
-            #빌드한 JAR 파일 다운로드
-            - name: Download Build Jar
-              uses: actions/download-artifact@v4
-              with:
-                name: restApi-jar
-                path: build/libs/
-                
-            # 헤로쿠 CLI 설치 (기존 스크립트 백업용 주석 처리)
-            # - name: Install Heroku CLI
-            #   run: curl https://cli-assets.heroku.com/install.sh | sh
-            
-            # Heroku 배포 (기존 스크립트 백업용 주석 처리)
-            # - name: Deploy to Heroku
-            #   uses: akhileshns/heroku-deploy@v3.13.15
-            #   with:
-            #     heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-            #     heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-            #     heroku_email: ${{ secrets.HEROKU_EMAIL }}
-            #     usedocker: false
-            #     healthcheck: "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e/api/getUrl"
-            #     checkstring: ""
-            #     # delay: 20
-            #     rollbackonhealthcheckfailed: true
+          if [ -z "$PREV_SHA" ] || [ "$PREV_SHA" = "null" ]; then
+            echo ">> 이전 성공 빌드 이력이 없어 직전 커밋(HEAD^)과 비교합니다."
+            PREV_SHA="HEAD^"
+          else
+            echo ">> 이전 성공 배포 커밋: $PREV_SHA"
+          fi
+          
+          if git diff --quiet $PREV_SHA HEAD -- \
+            src/main build.gradle Dockerfile .github/workflows/deploy.yml; then
+            echo ">> 소스 코드 변동 없음 -> 단순 재시작"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo ">> 소스 코드 변동 감지 -> 신규 빌드 및 배포 진행"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
 
-            # Lightsail로 JAR 파일 전송 (SCP)
-            - name: Copy Jar to Lightsail
-              uses: appleboy/scp-action@v0.1.7
-              with:
-                host: ${{ secrets.LIGHTSAIL_HOST }}
-                username: ${{ secrets.LIGHTSAIL_USERNAME }}
-                key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-                source: "build/libs/restApi.jar,build/libs/deploy.sh"
-                target: "/home/ubuntu/rest-api"
-                strip_components: 2 # build/libs/ 경로 구조 제거하고 파일만 전송
+  # 소스 코드 변경이 있을 때: 빌드 및 신규 배포
+  build-and-deploy:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    environment: redoc
+    permissions:
+      contents: read
+      packages: write
 
-            # Lightsail 서버에서 PM2로 Java API 백그라운드 구동
-            - name: SSH to Lightsail and deploy Java API
-              uses: appleboy/ssh-action@v1.0.3
-              with:
-                host: ${{ secrets.LIGHTSAIL_HOST }}
-                username: ${{ secrets.LIGHTSAIL_USERNAME }}
-                key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-                script: |
-                  mkdir -p /home/ubuntu/rest-api
-                  cd /home/ubuntu/rest-api
-                  
-                  chmod +x /home/ubuntu/rest-api/deploy.sh
-                  
-                  # 무중단 포트 스위칭 배포 스크립트 실행 (포트 정보 및 환경변수 주입)
-                  PORT_A="8080" \
-                  PORT_B="9080" \
-                  REDIS_HOST="${{ secrets.REDIS_HOST }}" \
-                  REDIS_PORT="${{ secrets.REDIS_PORT }}" \
-                  REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
-                  KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
-                  KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
-                  KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
-                  GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
-                  APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
-                  GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}" \
-                  /home/ubuntu/rest-api/deploy.sh
-            
-    #변경사항 없으면 서버만 재시작    
-    restart:
-        needs: check
-        if: needs.check.outputs.changed == 'false'
-        runs-on: ubuntu-latest
-        steps:
-            # 헤로쿠 재시작 (기존 스크립트 백업용 주석 처리)
-            # - name: Install Heroku CLI
-            #   run: curl https://cli-assets.heroku.com/install.sh | sh
-            # - name: Restart Heroku Dynos
-            #   run: heroku ps:restart -a ${{ secrets.HEROKU_APP_NAME }}
-            #   env:
-            #       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: SSH to Lightsail and restart
-              uses: appleboy/ssh-action@v1.0.3
-              with:
-                host: ${{ secrets.LIGHTSAIL_HOST }}
-                username: ${{ secrets.LIGHTSAIL_USERNAME }}
-                key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-                script: |
-                  cd /home/ubuntu/rest-api
-                  PORT_A="8080" \
-                  PORT_B="9080" \
-                  REDIS_HOST="${{ secrets.REDIS_HOST }}" \
-                  REDIS_PORT="${{ secrets.REDIS_PORT }}" \
-                  REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
-                  KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
-                  KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
-                  KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
-                  GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
-                  APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
-                  GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}" \
-                  /home/ubuntu/rest-api/deploy.sh
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build JAR with Gradle
+        run: ./gradlew clean bootJar -x test
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG="ghcr.io/${REPO_LOWER}:latest"
+          
+          docker build -t "$IMAGE_TAG" .
+          docker push "$IMAGE_TAG"
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Container Apps
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG="ghcr.io/${REPO_LOWER}:latest"
+
+          if ! az containerapp show --name rest-api --resource-group guney-aks &>/dev/null; then
+            echo ">> 신규 Azure Container App 생성 및 배포: rest-api"
+            az containerapp create \
+              --name rest-api \
+              --resource-group guney-aks \
+              --environment env-guney \
+              --image "$IMAGE_TAG" \
+              --target-port 8080 \
+              --ingress external \
+              --registry-server ghcr.io \
+              --registry-username ${{ github.actor }} \
+              --registry-password ${{ secrets.GITHUB_TOKEN }} \
+              --min-replicas 1 \
+              --max-replicas 3 \
+              --cpu 0.5 \
+              --memory 1.0Gi \
+              --env-vars \
+                SPRING_PROFILES_ACTIVE=prod \
+                REDIS_HOST="${{ secrets.REDIS_HOST }}" \
+                REDIS_PORT="${{ secrets.REDIS_PORT }}" \
+                REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
+                KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+                KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
+                KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
+                GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+                APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
+                GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}"
+          else
+            echo ">> 기존 Azure Container App 업데이트 배포: rest-api"
+            az containerapp registry set \
+              --name rest-api \
+              --resource-group guney-aks \
+              --server ghcr.io \
+              --username ${{ github.actor }} \
+              --password ${{ secrets.GITHUB_TOKEN }}
+
+            az containerapp update \
+              --name rest-api \
+              --resource-group guney-aks \
+              --image "$IMAGE_TAG" \
+              --set-env-vars \
+                SPRING_PROFILES_ACTIVE=prod \
+                REDIS_HOST="${{ secrets.REDIS_HOST }}" \
+                REDIS_PORT="${{ secrets.REDIS_PORT }}" \
+                REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
+                KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+                KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
+                KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
+                GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+                APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
+                GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}"
+          fi
+
+  # 소스 코드 변경이 없을 때: 빌드 건너뛰고 환경변수 갱신 및 즉시 재시작
+  restart:
+    needs: check
+    if: needs.check.outputs.changed == 'false'
+    runs-on: ubuntu-latest
+    environment: redoc
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Restart Azure Container App
+        run: |
+          echo ">> 소스 코드 변경 없음: 최신 환경변수 적용 및 컨테이너 무중단 재시작 실행"
+          az containerapp update \
+            --name rest-api \
+            --resource-group guney-aks \
+            --set-env-vars \
+              SPRING_PROFILES_ACTIVE=prod \
+              REDIS_HOST="${{ secrets.REDIS_HOST }}" \
+              REDIS_PORT="${{ secrets.REDIS_PORT }}" \
+              REDIS_TOKEN="${{ secrets.REDIS_TOKEN }}" \
+              KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+              KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
+              KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
+              GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+              APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
+              GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}"
