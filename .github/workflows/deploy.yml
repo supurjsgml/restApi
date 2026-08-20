@@ -2,8 +2,6 @@ name: Deploy rest-api to Azure Container Apps
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
 
 jobs:
   # 소스 코드 변경 사항 확인
