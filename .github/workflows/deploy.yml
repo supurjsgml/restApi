@@ -1,4 +1,4 @@
-name: Deploy rest-api to Azure Container Apps
+name: rest-api 배포 가쥬아
 
 on:
   workflow_dispatch:
@@ -173,4 +173,4 @@ jobs:
               KAKAO_REFRESH_TOKEN="${{ secrets.KAKAO_REFRESH_TOKEN }}" \
               GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
               APP_ADMIN_EMAILS="${{ secrets.APP_ADMIN_EMAILS }}" \
-              GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}"
+              GRAFANA_TOKEN="${{ secrets.GRAFANA_TOKEN }}"
