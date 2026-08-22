@@ -3,16 +3,11 @@ kind: Service
 metadata:
   name: rest-api-service
   namespace: default
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "alb"  #ALB 사용
-    service.beta.kubernetes.io/aws-load-balancer-internal: "false"  #외부에서 접근 가능하도록 설정
-    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"  #퍼블릭 ALB
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: rest-api
   ports:
     - protocol: TCP
-      port: 80         #클라이언트가 접근하는 포트
-      targetPort: 80 #컨테이너 내부에서 서비스되는 포트
-  externalTrafficPolicy: Local  #원본 IP 유지
+      port: 8080
+      targetPort: 8080

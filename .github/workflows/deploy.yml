@@ -121,6 +121,7 @@ jobs:
           if ! az containerapp show --name rest-api --resource-group guney-aks &>/dev/null; then
             echo ">> 신규 Azure Container App 생성: rest-api"
             az containerapp create \
+              --name rest-api \
               --resource-group guney-aks \
               --yaml manifests/app.rendered.yml
           else

@@ -2,9 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rest-api-deployment
-  namespace: default  #EKS에서 사용할 네임스페이스
+  namespace: default
+  labels:
+    app: rest-api
 spec:
-  replicas: 2  #2개의 Pod 사용
+  replicas: 2
   selector:
     matchLabels:
       app: rest-api
@@ -14,18 +16,30 @@ spec:
         app: rest-api
     spec:
       containers:
-        - name: rest-api-container
-          image: 827146411697.dkr.ecr.us-east-1.amazonaws.com/rest-api:latest  #ECR 이미지 사용
-          imagePullPolicy: IfNotPresent  #캐시 활용 가능
+        - name: rest-api
+          image: ghcr.io/guney/rest-api:latest
+          imagePullPolicy: Always
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           env:
-            - name: SPRING_PROFILES_ACTIVE  #환경 변수 추가 (예: prod, dev)
+            - name: SPRING_PROFILES_ACTIVE
               value: "prod"
-          resources:   #리소스 요청 및 제한 추가
+          resources:
             requests:
               cpu: "500m"
               memory: "512Mi"
             limits:
               cpu: "1000m"
               memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
