@@ -97,7 +97,7 @@ jobs:
             az containerapp create \
               --name rest-api \
               --resource-group guney-aks \
-              --environment env-guney \
+              --environment cluster-rest-api \
               --image "$IMAGE_TAG" \
               --target-port 8080 \
               --ingress external \
