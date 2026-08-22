@@ -40,12 +40,11 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-  # 소스 코드 변경이 있을 때: 빌드 및 신규 배포
-  build-and-deploy:
+  # 소스 코드 변경이 있을 때: 1단계 - 빌드 및 이미지 푸시 (자동 실행)
+  build:
     needs: check
     if: needs.check.outputs.changed == 'true'
     runs-on: ubuntu-latest
-    environment: redoc
     permissions:
       contents: read
       packages: write
@@ -81,6 +80,17 @@ jobs:
           
           docker build -t "$IMAGE_TAG" .
           docker push "$IMAGE_TAG"
+
+  # 소스 코드 변경이 있을 때: 2단계 - 관리자 승인 후 Azure 배포
+  deploy:
+    needs: [check, build]
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    environment: restApi
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Azure Login
         uses: azure/login@v2
@@ -126,7 +136,7 @@ jobs:
     needs: check
     if: needs.check.outputs.changed == 'false'
     runs-on: ubuntu-latest
-    environment: redoc
+    environment: restApi
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
