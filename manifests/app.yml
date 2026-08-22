@@ -26,6 +26,19 @@ properties:
         resources:
           cpu: 0.5
           memory: 1.0Gi
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          - type: Readiness
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
         env:
           - name: SPRING_PROFILES_ACTIVE
             value: "prod"
