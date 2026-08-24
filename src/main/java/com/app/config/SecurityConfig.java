@@ -24,6 +24,8 @@ public class SecurityConfig {
 	private final List<String> ALLOWED = List.of("https://guney.kro.kr"
 											   , "https://guney-api.kro.kr"
 											   , "https://xn--v69a93jfng.xn--yq5b.xn--3e0b707e"
+											   , "http://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e"
+											   , "https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e"
                                                , "chrome-extension://ilaafkabnbkdgaieedckdnfkmapocimc"
                                                , "chrome-extension://chjbcemdkiommdpeklplkbfpemefejcp"
                                                , "chrome-extension://hecddnbbnkjpjajhmdoldmimmpjghaic"  //로컬
@@ -34,7 +36,8 @@ public class SecurityConfig {
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))	//콜스콜스
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))	//콜스콜스
             .authorizeHttpRequests(authorize -> authorize
         		.requestMatchers("/v3/api-docs/**").permitAll()
         		.requestMatchers("/swagger-ui/**").permitAll()
