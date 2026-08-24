@@ -202,8 +202,8 @@ public class SwaggerConfig {
         schemas.forEach(components::addSchemas);
 
         Server apiServer = new Server()
-                .url("https://xn--v69a93jfng.xn--hk3b17f.xn--3e0b707e")
-                .description("PRD API 서버 (리거니.서버.한국)");
+                .url("https://guney-api.kro.kr")
+                .description("PRD API");
         Server localServer = new Server()
                 .url("http://localhost:8080")
                 .description("로컬 서버 (localhost:8080)");
