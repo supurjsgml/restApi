@@ -1,5 +1,6 @@
 package com.app.kakao.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,10 +10,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class KakaoSendReqDTO {
 
     private String msg;
-
-    private String refreshToken;
 }
+

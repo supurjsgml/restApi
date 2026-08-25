@@ -1,10 +1,10 @@
 package com.app.kakao.service.serviceimpl;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -27,13 +27,15 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class KakaoServiceImpl implements KakaoService {
 
+    private static final String KEY_KAKAO_REFRESH_TOKEN = "kakao:token:refresh";
+    private static final String KEY_KAKAO_ACCESS_TOKEN = "kakao:token:access";
+
     private static final ObjectMapper objectMapper = CommonUtil.om;
 
     private final WebClientUtil webClientUtil;
-
     private final RestApiProperties restApiProperties;
+    private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
 
-    // 카카오 앱 인증 정보 (Scheduler-Job이 refreshToken을 넘겨주므로, clientId/clientSecret만 restApi에서 보유)
     @Value("${key.kakao.clientId}")
     private String clientId;
 
@@ -41,88 +43,88 @@ public class KakaoServiceImpl implements KakaoService {
     private String clientSecret;
 
     @Value("${key.kakao.refreshToken}")
-    private String refreshToken;
+    private String defaultRefreshToken;
 
-    @Value("${key.kakao.token-file-path:kakao-token.txt}")
-    private String tokenFilePath;
-
-    private String loadRefreshToken() {
-        try {
-            if (tokenFilePath != null && !tokenFilePath.trim().isEmpty()) {
-                File file = new File(tokenFilePath.trim());
-                if (file.exists()) {
-                    String fileToken = Files.readString(file.toPath()).trim();
-                    if (!fileToken.isEmpty()) {
-                        log.info("리프레시 토큰을 로드: {}", file.getAbsolutePath());
-                        return fileToken;
+    private Mono<String> getRefreshToken() {
+        return reactiveStringRedisTemplate.opsForValue().get(KEY_KAKAO_REFRESH_TOKEN)
+                .filter(token -> !token.trim().isEmpty())
+                .switchIfEmpty(Mono.defer(() -> {
+                    if (defaultRefreshToken != null && !defaultRefreshToken.trim().isEmpty()) {
+                        log.info("설정 파일의 카카오 리프레시 토큰을 Redis에 초기 등록합니다.");
+                        return reactiveStringRedisTemplate.opsForValue()
+                                .set(KEY_KAKAO_REFRESH_TOKEN, defaultRefreshToken.trim(), Duration.ofDays(60))
+                                .thenReturn(defaultRefreshToken.trim());
                     }
-                }
-            }
-        } catch (Exception e) {
-            log.error("loadRefreshToken ERROR : {}", e.getMessage());
-        }
-        log.info("설정 정보의 리프레시 토큰을 사용.");
-        return refreshToken;
-    }
-
-    private void saveRefreshToken(String newToken) {
-        try {
-            if (tokenFilePath != null && !tokenFilePath.trim().isEmpty()) {
-                File file = new File(tokenFilePath.trim());
-                File parentDir = file.getParentFile();
-                if (parentDir != null && !parentDir.exists()) {
-                    parentDir.mkdirs();
-                }
-                Files.writeString(file.toPath(), newToken.trim());
-                log.info("리프레시 토큰 저장: {}", file.getAbsolutePath());
-            }
-        } catch (Exception e) {
-            log.error("리프레시 토큰 저장중 오류 발생: {}", e.getMessage());
-        }
+                    return Mono.empty();
+                }));
     }
 
     public Mono<String> getAccessToken() {
-        String currentRefreshToken = loadRefreshToken();
-        
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("grant_type", "refresh_token");
-        formData.add("client_id", clientId);
-        formData.add("client_secret", clientSecret);
-        formData.add("refresh_token", currentRefreshToken);
-
-        return webClientUtil.postFormAsync(
-                restApiProperties.getKakao().getAuth().getToken(),
-                formData,
-                null,
-                Map.class
-        ).flatMap(response -> {
-            String accessToken = (String) response.get("access_token");
-            String newRefreshToken = (String) response.get("refresh_token");
-            if (newRefreshToken != null && !newRefreshToken.trim().isEmpty()
-                    && !newRefreshToken.equals(currentRefreshToken)) {
-                saveRefreshToken(newRefreshToken);
-            }
-            return Mono.just(accessToken);
-        }).doOnError(e -> log.error("카카오 토큰 갱신 실패: {}", e.getMessage()));
+        return reactiveStringRedisTemplate.opsForValue().get(KEY_KAKAO_ACCESS_TOKEN)
+                .filter(token -> !token.trim().isEmpty())
+                .switchIfEmpty(Mono.defer(() -> refreshKakaoToken().map(KakaoTokenResDTO::getAccessToken)));
     }
 
     @Override
-    public void sendKakao(String msg) {
-        getAccessToken().flatMap(accessToken -> {
+    public Mono<KakaoTokenResDTO> refreshKakaoToken() {
+        return getRefreshToken()
+                .switchIfEmpty(Mono.error(new IllegalStateException("카카오 리프레시 토큰이 존재하지 않습니다.")))
+                .flatMap(currentRefreshToken -> {
+                    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+                    formData.add("grant_type", "refresh_token");
+                    formData.add("client_id", clientId);
+                    formData.add("client_secret", clientSecret);
+                    formData.add("refresh_token", currentRefreshToken);
+
+                    return webClientUtil.postFormAsync(
+                            restApiProperties.getKakao().getAuth().getToken(),
+                            formData,
+                            null,
+                            Map.class
+                    ).flatMap(response -> {
+                        String newAccessToken = (String) response.get("access_token");
+                        Number expiresInNum = (Number) response.get("expires_in");
+                        long expiresIn = expiresInNum != null ? expiresInNum.longValue() : 21600L;
+                        long accessTtl = expiresIn > 300 ? expiresIn - 300 : expiresIn;
+
+                        String newRefreshToken = (String) response.get("refresh_token");
+                        Number refreshExpiresInNum = (Number) response.get("refresh_token_expires_in");
+                        long refreshExpiresIn = refreshExpiresInNum != null ? refreshExpiresInNum.longValue() : 5184000L;
+
+                        Mono<Boolean> saveAccessMono = (newAccessToken != null && !newAccessToken.isEmpty())
+                                ? reactiveStringRedisTemplate.opsForValue().set(KEY_KAKAO_ACCESS_TOKEN, newAccessToken, Duration.ofSeconds(accessTtl))
+                                : Mono.just(false);
+
+                        Mono<Boolean> saveRefreshMono;
+                        if (newRefreshToken != null && !newRefreshToken.trim().isEmpty()) {
+                            log.info("새로운 카카오 리프레시 토큰이 발급되어 Redis에 갱신 저장합니다.");
+                            saveRefreshMono = reactiveStringRedisTemplate.opsForValue().set(KEY_KAKAO_REFRESH_TOKEN, newRefreshToken.trim(), Duration.ofSeconds(refreshExpiresIn));
+                        } else {
+                            saveRefreshMono = Mono.just(true);
+                        }
+
+                        return Mono.zip(saveAccessMono, saveRefreshMono)
+                                .map(tuple -> KakaoTokenResDTO.builder()
+                                        .accessToken(newAccessToken)
+                                        .newRefreshToken(newRefreshToken)
+                                        .build());
+                    });
+                })
+                .doOnSuccess(dto -> log.info("카카오 토큰 Redis 갱신 성공"))
+                .doOnError(e -> log.error("카카오 토큰 갱신 실패: {}", e.getMessage()));
+    }
+
+    private Mono<String> sendKakaoInternal(String msg, String restartPath) {
+        return getAccessToken().flatMap(accessToken -> {
             try {
-                // 카톡text 템플릿 생성
-                KakaoTextTemplate template = KakaoTextTemplate.restartTemplate(msg,
-                        restApiProperties.getBaseUrl(),
-                        "/api/lightsail/restart-api");
+                KakaoTextTemplate template = (restartPath != null && !restartPath.isEmpty())
+                        ? KakaoTextTemplate.restartTemplate(msg, restApiProperties.getBaseUrl(), restartPath)
+                        : KakaoTextTemplate.restartTemplate(msg, restApiProperties.getBaseUrl());
 
-                // 제이슨 ~ 직여을화
                 String templateJson = objectMapper.writeValueAsString(template);
-
-                // 파람이 태어났어요
                 MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
                 formData.add("template_object", templateJson);
 
-                // 카톡 나에게 메세지 전송
                 return webClientUtil.postFormAsync(
                         restApiProperties.getKakao().getApi().getMemo(),
                         formData,
@@ -132,67 +134,24 @@ public class KakaoServiceImpl implements KakaoService {
             } catch (JsonProcessingException e) {
                 return Mono.error(e);
             }
-        })
-        .subscribe(
-                res -> log.info("카카오 알림 전송 성공 : {}", res),
-                err -> log.error("카카오 알림 전송 최종 실패: {}", err.getMessage()));
+        });
     }
 
     @Override
-    public Mono<KakaoTokenResDTO> refreshTokenExternal(String externalRefreshToken) {
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("grant_type", "refresh_token");
-        formData.add("client_id", clientId);
-        formData.add("client_secret", clientSecret);
-        formData.add("refresh_token", externalRefreshToken);
-
-        return webClientUtil.postFormAsync(
-                restApiProperties.getKakao().getAuth().getToken(),
-                formData,
-                null,
-                Map.class
-        ).map(response -> {
-            String newRefreshToken = (String) response.get("refresh_token");
-            boolean hasNew = newRefreshToken != null && !newRefreshToken.trim().isEmpty()
-                    && !newRefreshToken.equals(externalRefreshToken);
-            if (hasNew) log.info("새 refreshToken 반환 (Scheduler-Job에서 저장 예정)");
-            return KakaoTokenResDTO.builder()
-                    .accessToken((String) response.get("access_token"))
-                    .newRefreshToken(hasNew ? newRefreshToken : null)
-                    .build();
-        }).doOnError(e -> log.error("외부 카카오 토큰 갱신 실패: {}", e.getMessage()));
+    public void sendKakao(String msg) {
+        sendKakaoInternal(msg, "/api/lightsail/restart-api")
+                .subscribe(
+                        res -> log.info("카카오 알림 전송 성공 : {}", res),
+                        err -> log.error("카카오 알림 전송 최종 실패: {}", err.getMessage())
+                );
     }
 
     @Override
-    public Mono<KakaoTokenResDTO> sendKakaoExternal(String msg, String externalRefreshToken) {
-        return refreshTokenExternal(externalRefreshToken)
-                .flatMap(tokenResult -> {
-                    String accessToken = tokenResult.getAccessToken();
-                    String newRefreshToken = tokenResult.getNewRefreshToken();
-
-                    KakaoTextTemplate template = KakaoTextTemplate.restartTemplate(msg,
-                            restApiProperties.getBaseUrl());
-
-                    String templateJson;
-                    try {
-                        templateJson = objectMapper.writeValueAsString(template);
-                    } catch (JsonProcessingException e) {
-                        return Mono.error(e);
-                    }
-
-                    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-                    formData.add("template_object", templateJson);
-
-                    return webClientUtil.postFormAsync(
-                            restApiProperties.getKakao().getApi().getMemo(),
-                            formData,
-                            Map.of("Authorization", "Bearer ".concat(accessToken)),
-                            String.class
-                    ).map(res -> KakaoTokenResDTO.builder()
-                            .newRefreshToken(newRefreshToken)
-                            .build());
-                })
+    public Mono<KakaoTokenResDTO> sendKakaoExternal(String msg) {
+        return sendKakaoInternal(msg, null)
+                .map(res -> KakaoTokenResDTO.builder().build())
                 .doOnError(e -> log.error("외부 카카오 메시지 전송 실패: {}", e.getMessage()));
     }
 
 }
+

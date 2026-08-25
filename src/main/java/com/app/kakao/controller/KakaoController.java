@@ -28,22 +28,22 @@ public class KakaoController {
     private final KakaoService kakaoService;
 
     /**
-     * Scheduler-Job → 카카오 토큰 갱신 요청
+     * 카카오 토큰 갱신 요청 (Redis 토큰 갱신)
      */
     @PostMapping(value = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ApiBodyDTO.Response<KakaoTokenResDTO>> refreshToken(@RequestBody KakaoRefreshReqDTO req) {
+    public Mono<ApiBodyDTO.Response<KakaoTokenResDTO>> refreshToken(@RequestBody(required = false) KakaoRefreshReqDTO req) {
         log.info("외부 카카오 토큰 갱신 요청 수신 (Scheduler-Job)");
-        return kakaoService.refreshTokenExternal(req.getRefreshToken())
+        return kakaoService.refreshKakaoToken()
                 .map(ApiResUtil::success);
     }
 
     /**
-     * Scheduler-Job → 카카오 메시지 전송 요청
+     * 카카오 메시지 전송 요청
      */
     @PostMapping(value = "/send", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ApiBodyDTO.Response<KakaoTokenResDTO>> sendMessage(@RequestBody KakaoSendReqDTO req) {
         log.info("외부 카카오 메시지 전송 요청 수신 (Scheduler-Job): {}", req.getMsg());
-        return kakaoService.sendKakaoExternal(req.getMsg(), req.getRefreshToken())
+        return kakaoService.sendKakaoExternal(req.getMsg())
                 .map(ApiResUtil::success);
     }
 
