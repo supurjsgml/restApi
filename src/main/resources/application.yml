@@ -58,7 +58,6 @@ key:
     clientId: 뭐게요
     clientSecret: 뭘까
     refreshToken: 궁굼하지롱
-    token-file-path: kakao-token.txt
   gemini:
     apiKey: ${GEMINI_API_KEY:끄으으으윽}
 
@@ -215,11 +214,6 @@ app:
   daily-limit: ${APP_DAILY_LIMIT:50}
 
 management:
-  metrics:
-    tags:
-      application: ${spring.application.name:rest-api}
-      instance: ${POD_NAME:${HOSTNAME:unknown}}
-      pod: ${POD_NAME:${HOSTNAME:unknown}}
   otlp:  
     metrics:  
       export: 

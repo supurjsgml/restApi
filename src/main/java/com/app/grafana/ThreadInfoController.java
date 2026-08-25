@@ -16,8 +16,12 @@ import io.swagger.v3.oas.annotations.Hidden;
 @RestController
 public class ThreadInfoController {
 
-    @Value("${POD_NAME:${HOSTNAME:unknown}}")
-    private String podName;
+    private final String podName;
+
+    public ThreadInfoController(
+            @Value("${CONTAINER_APP_REPLICA_NAME:${POD_NAME:${HOSTNAME:}}}") String configPodName) {
+        this.podName = MetricsConfig.resolvePodName(configPodName);
+    }
 
     @Hidden
     @GetMapping(value = "/actuator/threads", produces = MediaType.APPLICATION_JSON_VALUE)
