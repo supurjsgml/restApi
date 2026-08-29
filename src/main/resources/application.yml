@@ -236,7 +236,7 @@ logging:
   loki:
     url: https://logs-prod-030.grafana.net/loki/api/v1/push
     user: ${LOKI_USER:}
-    token: ${GRAFANA_TOKEN:}
+    token: ${LOKI_TOKEN:}
   axiom:
     api-url: https://api.axiom.co/v1/datasets/
     dataset: rest-api

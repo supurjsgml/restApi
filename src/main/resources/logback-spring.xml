@@ -28,7 +28,7 @@
     <springProfile name="prod">
         <springProperty scope="context" name="LOKI_URL" source="logging.loki.url" defaultValue="https://logs-prod-030.grafana.net/loki/api/v1/push"/>
         <springProperty scope="context" name="LOKI_USER" source="logging.loki.user" defaultValue="${LOKI_USER:}"/>
-        <springProperty scope="context" name="GRAFANA_TOKEN" source="logging.loki.token" defaultValue="${GRAFANA_TOKEN:}"/>
+        <springProperty scope="context" name="LOKI_TOKEN" source="logging.loki.token" defaultValue="${LOKI_TOKEN:}"/>
 
         <springProperty scope="context" name="AXIOM_API_URL" source="logging.axiom.api-url" defaultValue="https://api.axiom.co/v1/datasets/"/>
         <springProperty scope="context" name="AXIOM_DATASET" source="logging.axiom.dataset" defaultValue="rest-api"/>
@@ -44,7 +44,7 @@
                 <url>${LOKI_URL}</url>
                 <auth>
                     <username>${LOKI_USER}</username>
-                    <password>${GRAFANA_TOKEN}</password>
+                    <password>${LOKI_TOKEN}</password>
                 </auth>
             </http>
             <format>
