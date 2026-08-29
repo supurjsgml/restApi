@@ -60,6 +60,10 @@ properties:
             value: "${APP_ADMIN_EMAILS}"
           - name: GRAFANA_TOKEN
             value: "${GRAFANA_TOKEN}"
+          - name: LOKI_USER
+            value: "${LOKI_USER}"
+          - name: AXIOM_TOKEN
+            value: "${AXIOM_TOKEN}"
     scale:
       minReplicas: 2
       maxReplicas: 5

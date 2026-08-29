@@ -231,3 +231,17 @@ management:
     metrics:
       export:
         enabled: true
+
+logging:
+  loki:
+    url: https://logs-prod-030.grafana.net/loki/api/v1/push
+    user: ${LOKI_USER:}
+    token: ${GRAFANA_TOKEN:}
+  axiom:
+    api-url: https://api.axiom.co/v1/datasets/
+    dataset: rest-api
+    token: ${AXIOM_TOKEN:}
+    app: rest-api
+    batch-size: 50
+    flush-interval-ms: 1000
+    max-queue-size: 2048

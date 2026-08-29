@@ -112,6 +112,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_ADMIN_EMAILS: ${{ secrets.APP_ADMIN_EMAILS }}
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          LOKI_USER: ${{ secrets.LOKI_USER }}
+          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
         run: |
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           export IMAGE_TAG="ghcr.io/${REPO_LOWER}:${{ github.sha }}"
@@ -162,6 +164,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_ADMIN_EMAILS: ${{ secrets.APP_ADMIN_EMAILS }}
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          LOKI_USER: ${{ secrets.LOKI_USER }}
+          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
         run: |
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           export IMAGE_TAG="ghcr.io/${REPO_LOWER}:${{ github.sha }}"
