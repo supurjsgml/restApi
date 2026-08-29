@@ -49,7 +49,7 @@
             </http>
             <format>
                 <label>
-                    <pattern>app=rest-api,host=${CONTAINER_APP_REPLICA_NAME:-unknown},level=%level</pattern>
+                    <pattern>app=rest-api,replica=${CONTAINER_APP_REPLICA_NAME:-unknown},level=%level</pattern>
                 </label>
                 <message>
                     <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
