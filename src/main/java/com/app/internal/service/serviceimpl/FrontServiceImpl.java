@@ -52,7 +52,7 @@ public class FrontServiceImpl implements FrontService {
         int camel = 0;
         int translate = 0;
         int diff = 0;
-        int google = 0;
+        int jasypt = 0;
 
         try {
             Map<Object, Object> entries = redisTemplate.opsForHash().entries(PAGE_VISITS_KEY);
@@ -60,7 +60,7 @@ public class FrontServiceImpl implements FrontService {
             camel = parseCount(entries.get("Camel"));
             translate = parseCount(entries.get("Translate"));
             diff = parseCount(entries.get("Diff"));
-            google = parseCount(entries.get("Google"));
+            jasypt = parseCount(entries.get("Jasypt"));
         } catch (Exception e) {
             log.error("Redis 페이지 방문자 조회 중 오류 발생: {}", e.getMessage());
         }
@@ -70,7 +70,7 @@ public class FrontServiceImpl implements FrontService {
                 .camel(camel)
                 .translate(translate)
                 .diff(diff)
-                .google(google)
+                .jasypt(jasypt)
                 .build();
     }
 

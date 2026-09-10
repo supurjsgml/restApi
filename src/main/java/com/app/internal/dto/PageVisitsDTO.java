@@ -30,7 +30,7 @@ public class PageVisitsDTO {
     @Schema(description = "Diff 페이지 방문수", example = "40")
     private int diff;
 
-    @JsonProperty("Google")
-    @Schema(description = "Google 페이지 방문수", example = "20")
-    private int google;
+    @JsonProperty("Jasypt")
+    @Schema(description = "Jasypt 페이지 방문수", example = "20")
+    private int jasypt;
 }
