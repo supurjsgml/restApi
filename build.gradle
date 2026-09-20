@@ -52,6 +52,7 @@ dependencies {
 	
     // 메트릭 수집 및 Grafana 전송 관련 의존성
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-opentelemetry'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.micrometer:micrometer-registry-otlp'
     implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
