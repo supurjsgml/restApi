@@ -101,8 +101,6 @@ jobs:
 
       - name: Deploy to Azure Container Apps
         env:
-          GH_ACTOR: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
           REDIS_TOKEN: ${{ secrets.REDIS_TOKEN }}
@@ -154,8 +152,6 @@ jobs:
 
       - name: Restart Azure Container App
         env:
-          GH_ACTOR: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
           REDIS_TOKEN: ${{ secrets.REDIS_TOKEN }}
